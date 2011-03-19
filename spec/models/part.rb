@@ -4,5 +4,6 @@ class Part
   field :serial
   field :status
   
-  searchable_fields :serial, :status
+  searchable_field :serial
+  searchable_field :status
 end

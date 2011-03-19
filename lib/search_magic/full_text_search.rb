@@ -2,13 +2,14 @@ module SearchMagic
   module FullTextSearch
     module ClassMethods
       def self.extended(receiver)
+        receiver.send :class_attribute, :searchable_fields, :instance_writer => false
+        receiver.send :searchable_fields=, {}
+        receiver.send :field, :_searchable_values
         receiver.send :before_save, :update_searchable_values
       end
       
-      def searchable_fields(*field_names)
-        class_attribute :_searchable_fields, :instance_writer => false
-        send(:_searchable_fields=, Hash[*field_names.map {|field_name| [field_name, true]}.flatten])
-        field :_searchable_values
+      def searchable_field(field_name)
+        send(:searchable_fields)[field_name] = true
       end
       
       private
