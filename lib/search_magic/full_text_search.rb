@@ -8,8 +8,9 @@ module SearchMagic
         receiver.send :before_save, :update_searchable_values
       end
       
-      def searchable_field(field_name)
-        send(:searchable_fields)[field_name] = true
+      def search_on(field_name, options = {})
+        metadata = reflect_on_association(field_name)
+        send(:searchable_fields)[field_name] = Metadata.new(:field_name => field_name, :association => metadata, :options => options)
       end
       
       def search(pattern)
@@ -32,8 +33,44 @@ module SearchMagic
       private
       
       def update_searchable_values
-        send :_searchable_values=, self.searchable_fields.keys.map {|field_name| "#{field_name}:#{send(field_name)}"}
-      end    
+        send :_searchable_values=, self.searchable_fields.values.map {|metadata| metadata.searchable_value(self)}.flatten
+      end
+    end
+    
+    class Metadata
+      attr_accessor :field_name, :association, :options
+
+      def initialize(attributes = {})
+        attributes.each do |key, value|
+          send(:"#{key}=", value)
+        end
+        options[:only] = [options[:only]].flatten.compact
+        options[:except] = [options[:except]].flatten.compact
+      end
+      
+      def searchable_value(model)
+        searchable_names(model).map {|searchable_name, value, sub_name| value_for(searchable_name, value, sub_name)}
+      end
+      
+      def searchable_names(model)
+        name = options[:as] || self.field_name
+        value = model.send(self.field_name)
+        fields = self.association.class_name.constantize.searchable_fields.keys if self.association
+        fields = (fields - options[:except]) & (options[:only].empty? ? fields : options[:only]) if fields
+        case self.association.try(:macro)
+        when nil
+          [[name, value, nil]]
+        when :embedded_in, :embeds_one, :referenced_in, :references_one
+          fields.map {|sub_name| ["#{name}_#{sub_name}", value, sub_name]}
+        else
+          fields.map {|sub_name| ["#{name.to_s.singularize}_#{sub_name.to_s.pluralize}", value, sub_name]}
+        end
+      end
+      
+      def value_for(searchable_name, value, field_name)
+        v = field_name.present? && value.present? ? value.send(field_name) : value
+        v.to_s.gsub(/[[:punct:]]/, '').downcase.split.map {|word| [searchable_name, word].join(":")}
+      end
     end
   
     def self.included(receiver)

@@ -4,8 +4,8 @@ describe SearchMagic::FullTextSearch do
   describe "included" do
     subject { NoSearchFields }
     
-    it "should add a class method called :searchable_field" do
-      should respond_to(:searchable_field)
+    it "should add a class method called :search_on" do
+      should respond_to(:search_on).with(2).arguments
     end
     
     it "should create a class attribute called :searchable_fields and make it a Hash" do
@@ -107,6 +107,13 @@ describe SearchMagic::FullTextSearch do
       context "when searching for 'serial:available'" do
         subject { Part.search("serial:available") }
         it { subject.count.should == 0 }
+      end
+      
+      context "when searching for 'status:avail serial:1234'" do
+        subject { Part.search("status:avail serial:1234") }
+        it { subject.count.should == 1 }
+        it { subject.first.status.should == "available" }
+        it { subject.first.serial.should == "1234abcd" }
       end
     end
   end

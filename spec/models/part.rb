@@ -5,6 +5,8 @@ class Part
   field :status
   field :category
   
-  searchable_field :serial
-  searchable_field :status
+  referenced_in :person
+  
+  search_on :serial
+  search_on :status
 end
