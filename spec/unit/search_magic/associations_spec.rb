@@ -40,4 +40,11 @@ describe SearchMagic::FullTextSearch do
       its("first.name") { should == "Samuel" }
     end
   end
+  
+  context "model relates to many other documents" do
+  end
+  
+  context "model relates to many other documents through another document" do
+    
+  end
 end
