@@ -1,0 +1,3 @@
+module SearchMagic
+  # Your code goes here...
+end
