@@ -1,3 +1,3 @@
 module SearchMagic
-  # Your code goes here...
+  require 'search_magic/full_text_search'
 end

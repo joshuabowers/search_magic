@@ -11,6 +11,11 @@ Gem::Specification.new do |s|
   s.homepage    = ""
   s.summary     = %q{SearchMagic provides scoped full text search and sort capabilities to Mongoid documents}
   s.description = %q{Adds scopes to a Mongoid document providing search and sort capabilities on arbitrary fields and associations.}
+  
+  s.add_dependency("mongoid", ">= 2.0.0.rc.7")
+  s.add_development_dependency("rspec")
+  s.add_development_dependency("database_cleaner")
+  s.add_development_dependency("bson_ext")
 
   s.rubyforge_project = "search_magic"
 
