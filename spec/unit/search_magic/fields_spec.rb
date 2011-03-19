@@ -1,122 +1,108 @@
 require 'spec_helper'
 
 describe SearchMagic::FullTextSearch do
-  describe "included" do
-    subject { NoSearchFields }
+  context "when included in a model without :searchables" do
+    subject { NoSearchables }
     
-    it "should add a class method called :search_on" do
-      should respond_to(:search_on).with(2).arguments
-    end
+    it { should respond_to(:search_on).with(2).arguments }
     
-    it "should create a class attribute called :searchable_fields and make it a Hash" do
-      should respond_to(:searchable_fields)
-      subject.searchable_fields.should be_a(Hash)
-    end
+    it { should respond_to(:searchable_fields) }
+    its(:searchable_fields) { should be_a(Hash) }  
+    its(:searchable_fields) { should be_blank }
     
-    it "should have no :searchable_fields" do
-      subject.searchable_fields.should be_empty
-    end
-    
-    it "should create a field called :_searchable_values and make it an empty Array" do
-      subject.fields.keys.should include("_searchable_values")
-      subject.fields["_searchable_values"].type.should == Array
-      subject.fields["_searchable_values"].default.should == []
+    its("fields.keys") { should include("_searchable_values") }
+    describe "_searchable_values" do
+      subject { NoSearchables.fields["_searchable_values"] }
+      its(:type) { should == Array }
+      its(:default) { should == [] }
     end
     
     it { should respond_to(:search).with(1).argument }
   end
   
-  describe "searchable_field" do
-    context "when called with :serial and :status" do
-      describe "searchable_fields should have" do
-        subject { Part }
-        
-        its("searchable_fields.keys") { should include(:serial, :status) }
-        its("searchable_fields.keys") { should_not include(:category) }
-      
-        its(:searchables) { should include(:serial, :status) }
-        its(:searchables) { should_not include(:category) }
-      end
-      
-      describe "update searchable values" do
-        subject { Part.new(:status => "available", :serial => "1234abcd", :category => "widget") }
-        
-        it "should run the update_searchable_values callback" do
-          subject.should_receive(:update_searchable_values)
-          subject.run_callbacks(:save)
-        end
-        
-        it "should have values in :_searchable_values" do
-          subject.run_callbacks(:save)
-          subject._searchable_values.should_not be_empty
-        end
-        
-        it "should have entries for each field in :searchable_fields" do
-          subject.run_callbacks(:save)
-          Part.searchable_fields.keys.each do |field_name|
-            subject._searchable_values.should include("#{field_name}:#{subject.send(field_name)}")
-          end
-        end
-        
-        it "should not have entries in :_searchable_values for fields not included in :searchable_fields" do
-          subject.run_callbacks(:save)
-          (Part.fields.keys - Part.searchable_fields.keys.map(&:to_s)).each do |field_name|
-            subject._searchable_values.should_not include("#{field_name}:#{subject.send(field_name)}")
-          end
-        end
-      end
-    end
+  context "when :search_on called with [:title, :description, :tags]" do
+    subject { Asset }
+    its("searchable_fields.keys") { should include(:title, :description, :tags) }
+    its("searchable_fields.keys") { should_not include(:uuid) }
+    
+    its(:searchables) { should include(:title, :description, :tags) }
+    its(:searchables) { should_not include(:uuid) }
   end
   
-  describe :search do
-    context "any model" do
-      it { NoSearchFields.search("foo bar").should be_a(Mongoid::Criteria) }
+  describe "saving a model should run the :update_searchable_values callback" do
+    subject { Asset.new }
+    after(:each) { subject.save }
+    it { subject.should_receive :update_searchable_values }
+  end
+  
+  context "when a model is saved, its :_searchable_values update" do
+    subject { Asset.new(:title => "Foo Bar: The Bazzening", :description => "Sequel to last years hit summer blockbuster.", :tags => ["movies", "foo.bar", "the-bazzening"], :uuid => "ae9d14ee-be93-11df-9fec-78ca39fffe11")}
+    before(:each) { subject.save }
+    its(:_searchable_values) { should_not be_empty }
+    its(:_searchable_values) { should include("title:foo", "title:bar", "title:the", "title:bazzening")}
+    its(:_searchable_values) { should include("description:sequel", "description:to", "description:last", "description:years", "description:hit", "description:summer", "description:blockbuster")}
+    its(:_searchable_values) { should_not include("uuid:ae9d14ee-be93-11df-9fec-78ca39fffe11", "uuid:ae9d14ee")}
+    its(:_searchable_values) { should include("tags:movies", "tags:foo.bar", "tags:the-bazzening")}
+  end
+  
+  context "when :search is performed on a model without :searchables" do
+    subject { NoSearchables.search("foo") }
+    it { should be_a(Mongoid::Criteria) }
+    its(:count) { should == 0 }
+  end
+  
+  context "when :search is performed on a model with :searchables" do
+    before(:each) do
+      Asset.create(:title => "Foo Bar: The Bazzening", :description => "Sequel to last years hit summer blockbuster.", :tags => ["movies", "foo.bar", "the-bazzening"])
+      Asset.create(:title => "Undercover Foo", :description => "When a foo goes undercover, how far will he go to protect those he loves?", :tags => ["undercover.foo", "action"])
+      Asset.create(:title => "Cheese of the Damned", :description => "This is not your father's munster.", :tags => ["movies", "cheese", "munster", "horror"])
+    end
+
+    context "when searching for nil" do
+      subject { Asset.search(nil) }
+      it { should be_a(Mongoid::Criteria) }
+      its("selector.keys") { should_not include(:_searchable_values) }
     end
     
-    context "no search fields" do
-      it { NoSearchFields.search("foo").count.should == 0 }
+    context "when searching on an empty string" do
+      subject { Asset.search("") }
+      it { should be_a(Mongoid::Criteria) }
+      its("selector.keys") { should_not include(:_searchable_values) }
     end
     
-    context "defined search fields :status and :serial" do
-      before do 
-        Part.create(:status => "available", :serial => "1234abcd", :category => "widget")
-        Part.create(:status => "available", :serial => "4321dcba", :category => "object")
-        Part.create(:status => "defective", :serial => "7890qwer", :category => "widget")
-      end
-      
-      context "when searching for anything" do
-        subject { Part.search("foo") }
-        it { subject.selector.keys.should include(:_searchable_values) }
-      end
-      
-      context "when searching for nothing" do
-        it { Part.search(nil).selector.keys.should_not include(:_searchable_values) }
-        it { Part.search("").selector.keys.should_not include(:_searchable_values) }
-      end
-      
-      context "when searching for 'available'" do
-        subject { Part.search("available") }
-        its(:count) { should == 2 }
-        it { subject.each {|item| item.status.should == "available"} }
-      end
-      
-      context "when searching for 'status:available'" do
-        subject { Part.search("status:available") }
-        its(:count) { should == 2 }
-        it { subject.each {|item| item.status.should == "available"} }
-      end
-      
-      context "when searching for 'serial:available'" do
-        subject { Part.search("serial:available") }
-        its(:count) { should == 0 }
-      end
-      
-      context "when searching for 'status:avail serial:1234'" do
-        subject { Part.search("status:avail serial:1234") }
-        its(:count) { should == 1 }
-        its("first.status") { should == "available" }
-        its("first.serial") { should == "1234abcd" }
-      end
+    context "when searching for anything" do
+      subject { Asset.search("foo") }
+      it { should be_a(Mongoid::Criteria) }
+      its("selector.keys") { should include(:_searchable_values) }
+    end
+    
+    context "when searching for 'foo'" do
+      subject { Asset.search("foo").map(&:title) }
+      its(:count) { should == 2 }
+      it { should include("Foo Bar: The Bazzening", "Undercover Foo") }
+    end
+    
+    context "when searching for 'title:foo'" do
+      subject { Asset.search("title:foo").map(&:title) }
+      its(:count) { should == 2 }
+      it { should include("Foo Bar: The Bazzening", "Undercover Foo") }
+    end
+    
+    context "when searching for 'description:bazzening'" do
+      subject { Asset.search("description:bazzening") }
+      its(:count) { should == 0 }
+    end
+    
+    context "when searching for 'tags:foo.bar'" do
+      subject { Asset.search("tags:foo.bar").map(&:title) }
+      its(:count) { should == 1 }
+      its(:first) { should == "Foo Bar: The Bazzening" }
+    end
+    
+    context "when searching for 'tags:movies cheese" do
+      subject { Asset.search("tags:movies cheese").map(&:title) }
+      its(:count) { should == 1 }
+      its(:first) { should == "Cheese of the Damned" }
     end
   end
 end

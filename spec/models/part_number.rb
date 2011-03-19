@@ -1,10 +1,11 @@
 class PartNumber
   include Mongoid::Document
   include SearchMagic::FullTextSearch
-  field value
+  field :value
   
   references_many :parts
   referenced_in :part_category
   
   search_on :value
+  search_on :part_category
 end

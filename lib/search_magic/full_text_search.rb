@@ -73,7 +73,9 @@ module SearchMagic
       
       def value_for(searchable_name, value, field_name)
         v = field_name.present? && value.present? ? value.send(field_name) : value
-        v.to_s.gsub(/[[:punct:]]/, '').downcase.split.map {|word| [searchable_name, word].join(":")}
+        v = v.is_a?(Array) ? v.join(" ") : v.to_s
+        v = v.gsub(/[[:punct:]]/, '') unless options[:keep_punctuation]
+        v.downcase.split.map {|word| [searchable_name, word].join(":")}
       end
     end
   
