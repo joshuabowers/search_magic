@@ -22,6 +22,8 @@ describe SearchMagic::FullTextSearch do
       subject.fields["_searchable_values"].type.should == Array
       subject.fields["_searchable_values"].default.should == []
     end
+    
+    it { should respond_to(:search).with(1).argument }
   end
   
   describe "searchable_field" do
@@ -60,6 +62,51 @@ describe SearchMagic::FullTextSearch do
             subject._searchable_values.should_not include("#{field_name}:#{subject.send(field_name)}")
           end
         end
+      end
+    end
+  end
+  
+  describe :search do
+    context "any model" do
+      it { NoSearchFields.search("foo bar").should be_a(Mongoid::Criteria) }
+    end
+    
+    context "no search fields" do
+      it { NoSearchFields.search("foo").count.should == 0 }
+    end
+    
+    context "defined search fields :status and :serial" do
+      before do 
+        Part.create(:status => "available", :serial => "1234abcd", :category => "widget")
+        Part.create(:status => "available", :serial => "4321dcba", :category => "object")
+        Part.create(:status => "defective", :serial => "7890qwer", :category => "widget")
+      end
+      
+      context "when searching for anything" do
+        subject { Part.search("foo") }
+        it { subject.selector.keys.should include(:_searchable_values) }
+      end
+      
+      context "when searching for nothing" do
+        it { Part.search(nil).selector.keys.should_not include(:_searchable_values) }
+        it { Part.search("").selector.keys.should_not include(:_searchable_values) }
+      end
+      
+      context "when searching for 'available'" do
+        subject { Part.search("available") }
+        it { subject.count.should == 2 }
+        it { subject.each {|item| item.status.should == "available"} }
+      end
+      
+      context "when searching for 'status:available'" do
+        subject { Part.search("status:available") }
+        it { subject.count.should == 2 }
+        it { subject.each {|item| item.status.should == "available"} }
+      end
+      
+      context "when searching for 'serial:available'" do
+        subject { Part.search("serial:available") }
+        it { subject.count.should == 0 }
       end
     end
   end

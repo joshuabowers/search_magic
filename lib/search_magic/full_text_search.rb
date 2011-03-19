@@ -11,6 +11,21 @@ module SearchMagic
       def searchable_field(field_name)
         send(:searchable_fields)[field_name] = true
       end
+      
+      def search(pattern)
+        rval = /("[^"]+"|\S+)/
+        rsearch = /(?:(#{searchable_fields.keys.join('|')}):#{rval})|#{rval}/i
+        unless pattern.blank?
+          terms = pattern.scan(rsearch).map(&:compact).map do |term|
+            term.last.scan(/\b(\S+)\b/).flatten.map do |word|
+              /#{term.length > 1 ? Regexp.escape(term.first) : '[^:]+'}:.*#{Regexp.escape(word)}/i
+            end
+          end.flatten
+          all_in(:_searchable_values => terms)
+        else
+          criteria
+        end
+      end
     end
   
     module InstanceMethods
