@@ -13,9 +13,13 @@ module SearchMagic
         send(:searchable_fields)[field_name] = Metadata.new(:field_name => field_name, :association => metadata, :options => options)
       end
       
+      def searchables
+        @searchables ||= searchable_fields.values.map {|metadata| metadata.searchable_names(nil).map(&:first)}.flatten
+      end
+      
       def search(pattern)
         rval = /("[^"]+"|\S+)/
-        rsearch = /(?:(#{searchable_fields.keys.join('|')}):#{rval})|#{rval}/i
+        rsearch = /(?:(#{searchables.join('|')}):#{rval})|#{rval}/i
         unless pattern.blank?
           terms = pattern.scan(rsearch).map(&:compact).map do |term|
             term.last.scan(/\b(\S+)\b/).flatten.map do |word|
@@ -54,16 +58,16 @@ module SearchMagic
       
       def searchable_names(model)
         name = options[:as] || self.field_name
-        value = model.send(self.field_name)
+        value = model.present? ? model.send(self.field_name) : nil
         fields = self.association.class_name.constantize.searchable_fields.keys if self.association
         fields = (fields - options[:except]) & (options[:only].empty? ? fields : options[:only]) if fields
         case self.association.try(:macro)
         when nil
           [[name, value, nil]]
         when :embedded_in, :embeds_one, :referenced_in, :references_one
-          fields.map {|sub_name| ["#{name}_#{sub_name}", value, sub_name]}
+          fields.map {|sub_name| [:"#{name}_#{sub_name}", value, sub_name]}
         else
-          fields.map {|sub_name| ["#{name.to_s.singularize}_#{sub_name.to_s.pluralize}", value, sub_name]}
+          fields.map {|sub_name| [:"#{name.to_s.singularize}_#{sub_name.to_s.pluralize}", value, sub_name]}
         end
       end
       

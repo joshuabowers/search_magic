@@ -28,12 +28,14 @@ describe SearchMagic::FullTextSearch do
   
   describe "searchable_field" do
     context "when called with :serial and :status" do
-      it "should add :serial and :status to :searchable_fields" do
-        Part.searchable_fields.keys.should include(:serial, :status) 
-      end
+      describe "searchable_fields should have" do
+        subject { Part }
+        
+        its("searchable_fields.keys") { should include(:serial, :status) }
+        its("searchable_fields.keys") { should_not include(:category) }
       
-      it "should not have :category in :searchable_fields" do
-        Part.searchable_fields.keys.should_not include(:category)
+        its(:searchables) { should include(:serial, :status) }
+        its(:searchables) { should_not include(:category) }
       end
       
       describe "update searchable values" do
@@ -94,26 +96,26 @@ describe SearchMagic::FullTextSearch do
       
       context "when searching for 'available'" do
         subject { Part.search("available") }
-        it { subject.count.should == 2 }
+        its(:count) { should == 2 }
         it { subject.each {|item| item.status.should == "available"} }
       end
       
       context "when searching for 'status:available'" do
         subject { Part.search("status:available") }
-        it { subject.count.should == 2 }
+        its(:count) { should == 2 }
         it { subject.each {|item| item.status.should == "available"} }
       end
       
       context "when searching for 'serial:available'" do
         subject { Part.search("serial:available") }
-        it { subject.count.should == 0 }
+        its(:count) { should == 0 }
       end
       
       context "when searching for 'status:avail serial:1234'" do
         subject { Part.search("status:avail serial:1234") }
-        it { subject.count.should == 1 }
-        it { subject.first.status.should == "available" }
-        it { subject.first.serial.should == "1234abcd" }
+        its(:count) { should == 1 }
+        its("first.status") { should == "available" }
+        its("first.serial") { should == "1234abcd" }
       end
     end
   end
