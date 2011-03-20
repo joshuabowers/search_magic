@@ -10,9 +10,9 @@ describe SearchMagic::FullTextSearch do
     its(:searchable_fields) { should be_a(Hash) }  
     its(:searchable_fields) { should be_blank }
     
-    its("fields.keys") { should include("_searchable_values") }
-    describe "_searchable_values" do
-      subject { NoSearchables.fields["_searchable_values"] }
+    its("fields.keys") { should include("searchable_values") }
+    describe "searchable_values" do
+      subject { NoSearchables.fields["searchable_values"] }
       its(:type) { should == Array }
       its(:default) { should == [] }
     end
@@ -38,11 +38,11 @@ describe SearchMagic::FullTextSearch do
   context "when a model is saved, its :_searchable_values update" do
     subject { Asset.new(:title => "Foo Bar: The Bazzening", :description => "Sequel to last years hit summer blockbuster.", :tags => ["movies", "foo.bar", "the-bazzening"], :uuid => "ae9d14ee-be93-11df-9fec-78ca39fffe11")}
     before(:each) { subject.save }
-    its(:_searchable_values) { should_not be_empty }
-    its(:_searchable_values) { should include("title:foo", "title:bar", "title:the", "title:bazzening")}
-    its(:_searchable_values) { should include("description:sequel", "description:to", "description:last", "description:years", "description:hit", "description:summer", "description:blockbuster")}
-    its(:_searchable_values) { should_not include("uuid:ae9d14ee-be93-11df-9fec-78ca39fffe11", "uuid:ae9d14ee")}
-    its(:_searchable_values) { should include("tag:movies", "tag:foo.bar", "tag:the-bazzening")}
+    its(:searchable_values) { should_not be_empty }
+    its(:searchable_values) { should include("title:foo", "title:bar", "title:the", "title:bazzening")}
+    its(:searchable_values) { should include("description:sequel", "description:to", "description:last", "description:years", "description:hit", "description:summer", "description:blockbuster")}
+    its(:searchable_values) { should_not include("uuid:ae9d14ee-be93-11df-9fec-78ca39fffe11", "uuid:ae9d14ee")}
+    its(:searchable_values) { should include("tag:movies", "tag:foo.bar", "tag:the-bazzening")}
   end
   
   context "when :search is performed on a model without :searchables" do
@@ -61,19 +61,19 @@ describe SearchMagic::FullTextSearch do
     context "when searching for nil" do
       subject { Asset.search(nil) }
       it { should be_a(Mongoid::Criteria) }
-      its("selector.keys") { should_not include(:_searchable_values) }
+      its("selector.keys") { should_not include(:searchable_values) }
     end
     
     context "when searching on an empty string" do
       subject { Asset.search("") }
       it { should be_a(Mongoid::Criteria) }
-      its("selector.keys") { should_not include(:_searchable_values) }
+      its("selector.keys") { should_not include(:searchable_values) }
     end
     
     context "when searching for anything" do
       subject { Asset.search("foo") }
       it { should be_a(Mongoid::Criteria) }
-      its("selector.keys") { should include(:_searchable_values) }
+      its("selector.keys") { should include(:searchable_values) }
     end
     
     context "when searching for 'foo'" do

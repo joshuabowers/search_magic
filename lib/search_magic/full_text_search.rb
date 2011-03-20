@@ -4,7 +4,7 @@ module SearchMagic
       def self.extended(receiver)
         receiver.send :class_attribute, :searchable_fields, :instance_writer => false
         receiver.send :searchable_fields=, {}
-        receiver.send :field, :_searchable_values, :type => Array, :default => []
+        receiver.send :field, :searchable_values, :type => Array, :default => []
         receiver.send :before_save, :update_searchable_values
       end
       
@@ -26,7 +26,7 @@ module SearchMagic
               /#{term.length > 1 ? Regexp.escape(term.first) : '[^:]+'}:.*#{Regexp.escape(word)}/i
             end
           end.flatten
-          all_in(:_searchable_values => terms)
+          all_in(:searchable_values => terms)
         else
           criteria
         end
@@ -37,7 +37,7 @@ module SearchMagic
       private
       
       def update_searchable_values
-        send :_searchable_values=, self.searchable_fields.values.map {|metadata| metadata.searchable_value(self)}.flatten
+        send :searchable_values=, self.searchable_fields.values.map {|metadata| metadata.searchable_value(self)}.flatten
       end
     end
     

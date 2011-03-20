@@ -24,12 +24,12 @@ describe SearchMagic::FullTextSearch do
     describe "model should have embedded document fields in :_searchable_values" do
       subject { Person.where(:name => "Joshua").first }
       it { subject.address.should_not be_nil }
-      it { subject._searchable_values.should include("address_street:123", "address_street:example", "address_street:st") }
+      it { subject.searchable_values.should include("address_street:123", "address_street:example", "address_street:st") }
     end
     
     context "when searching for 'address_city:nowhereland'" do
       subject { Person.search("address_city:nowhereland") }
-      its("selector.keys") { should include(:_searchable_values) }
+      its("selector.keys") { should include(:searchable_values) }
       its(:count) { should == 1 }
       its("first.name") { should == "Joshua" }
     end
