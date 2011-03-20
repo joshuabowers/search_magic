@@ -1,6 +1,6 @@
 h1. SearchMagic
 
-SearchMagic provides full-text search capabilities to "mongoid":"github.com/mongoid/mongoid" documents, embedded documents, and referenced documents with a clean, consistent, and easy to use syntax. Searching can be performed on either word fragments, such as @foo@, or can use a selector-syntax, @foo:bar@, to target which fields of the document the search is to be restricted to.
+SearchMagic provides full-text search capabilities to "mongoid":github.com/mongoid/mongoid documents, embedded documents, and referenced documents with a clean, consistent, and easy to use syntax. Searching can be performed on either word fragments, such as @foo@, or can use a selector-syntax, @foo:bar@, to target which fields of the document the search is to be restricted to.
 
 h2. Installation
 
@@ -9,5 +9,31 @@ SearchMagic is built on top of the latest pre-release version of mongoid; in all
 bc. gem 'search_magic'
 
 h2. Getting Started
+
+h3. Adding FullTextSearch capabilities
+
+Adding FullTextSearch is as simple as including the appropriate module into a mongoid document and defining which fields are to be searchable. In the following example, the @SearchMagic::FullTextSearch@ module is included and each field of the model is made searchable.
+
+bc.. class Address
+  include Mongoid::Document
+  include SearchMagic::FullTextSearch
+  field :street
+  field :city
+  field :state
+  field :post_code
+  
+  search_on :street
+  search_on :city
+  search_on :state
+  search_on :post_code
+end
+
+At this point, @Address@ can be searched by calling its @:search@ method:
+
+bc. Address.search("state:ca")
+
+h3. @:search_on@
+
+h3. @:search@
 
 h2. Problems?
