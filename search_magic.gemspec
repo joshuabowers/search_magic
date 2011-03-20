@@ -8,7 +8,7 @@ Gem::Specification.new do |s|
   s.platform    = Gem::Platform::RUBY
   s.authors     = ["Joshua Bowers"]
   s.email       = ["joshua.bowers+code@gmail.com"]
-  s.homepage    = ""
+  s.homepage    = "http://github.com/joshuabowers/search_magic"
   s.summary     = %q{SearchMagic provides scoped full text search and sort capabilities to Mongoid documents}
   s.description = %q{Adds scopes to a Mongoid document providing search and sort capabilities on arbitrary fields and associations.}
   
