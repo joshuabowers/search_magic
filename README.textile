@@ -126,4 +126,4 @@ Part.search("bike serial:b1234") # full text search on "bike", with an extra req
 
 h2. Problems? Comments?
 
-Feel free to add an "issue on GitHub":issues or fork the project and send a pull request. I'm always looking for new ways of bending hardware to my will, so suggestions are welcome.
+Feel free to add an "issue on GitHub":search_magic/issues or fork the project and send a pull request. I'm always looking for new ways of bending hardware to my will, so suggestions are welcome.
