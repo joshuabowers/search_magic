@@ -1,10 +1,10 @@
 h1. SearchMagic
 
-SearchMagic provides full-text search capabilities to "mongoid":http://github.com/mongoid/mongoid documents, embedded documents, and referenced documents with a clean, consistent, and easy to use syntax. Searching can be performed on either word fragments, such as @foo@, or can use a selector-syntax, @foo:bar@, to target which fields of the document the search is to be restricted to.
+SearchMagic provides full-text search capabilities to "mongoid":http://github.com/mongoid/mongoid documents, embedded documents, and referenced documents with a clean, consistent, and easy to use syntax. Searching can be performed on either word fragments, such as *foo*, or can use a selector-syntax, *foo:bar*, to target which fields of the document the search is to be restricted to.
 
 h2. Installation
 
-SearchMagic is built on top of the latest pre-release version of mongoid; in all likelihood, it will only work with versions greater than or equal to @2.0.0.rc.7@. For environments where bundler is being used, it can be installed by adding the following to your Gemfile and running @bundle@.
+SearchMagic is built on top of the latest pre-release version of mongoid; in all likelihood, it will only work with versions greater than or equal to _2.0.0.rc.7_. For environments where bundler is being used, it can be installed by adding the following to your Gemfile and running @bundle@.
 
 bc. gem 'search_magic'
 
@@ -12,15 +12,16 @@ h2. Getting Started
 
 h3. Adding FullTextSearch capabilities
 
-Adding FullTextSearch is as simple as including the appropriate module into a mongoid document and defining which fields are to be searchable. In the following example, the @SearchMagic::FullTextSearch@ module is included and each field of the model is made searchable.
+Adding FullTextSearch is as simple as including the appropriate module into a mongoid document and defining which fields are to be searchable. In the following example, the *SearchMagic::FullTextSearch* module is included and each field of the model is made searchable.
 
-bc[rb].. class Address
+bc.. class Address
   include Mongoid::Document
   include SearchMagic::FullTextSearch
   field :street
   field :city
   field :state
   field :post_code
+  embedded_in :person
   
   search_on :street
   search_on :city
@@ -28,12 +29,39 @@ bc[rb].. class Address
   search_on :post_code
 end
 
-p. At this point, @Address@ can be searched by calling its @:search@ method:
+p. At this point, *Address* can be searched by calling its @:search@ method:
 
 bc. Address.search("state:ca")
 
 h3. :search_on
 
+Fields that are made searchable by :search_on have their values cached in an embedded array within each document. This array, *:searchable_values*, should contain entries of the form *field_name:value*. The selector, *field_name*, represents a filter which can be used when searching to narrow the search space; it can be manually renamed by passing the *:as* option to :search_on:
+
+bc. search_on :post_code, :as => :zip_code 
+
+The example in the previous section showcased using :search_on on basic *Mongoid::Document* fields. It can, however, be used on fields within a document which denote an association.
+
+bc.. class Person
+  include Mongoid::Document
+  include SearchMagic::FullTextSearch
+  field :name
+  embeds_one :address
+  
+  search_on :name
+  search_on :address
+end
+
+p. When an association is searched on, all of its searchable fields are automatically made searchable in the first document. In the previous example, this means that the four fields of *Address*, @[:street, :city, :state, :post_code]@ are now searchable from within *Person*. As such, each association will end up adding entries into the *:searchable_values* array. The searchable fields which are introduced from an association can be restricted by use of the *:only* and *:except* options, which may either take an array or an individual field name:
+
+bc. search_on :address, :only => [:street, :state]
+search_on :address, :except => :post_code
+
+By default, an association's fields will be prefixed by name of the association. Therefore, the previous example would add entries to *:searchable_values* with the selectors @[:address_street, :address_city, :address_state, :address_post_code]@. The *:as* option alters the prefix:
+
+bc. search_on :address, :as => :location # results in :location_street, :location_city, ...
+
 h3. :search
 
-h2. Problems?
+h2. Problems? Comments?
+
+Feel free to add an "issue on GitHub":/issues or fork the project and send a pull request. I'm always looking for new ways of bending hardware to my will, so suggestions are welcome.
