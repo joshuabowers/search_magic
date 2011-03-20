@@ -10,5 +10,5 @@ class Address
   search_on :street
   search_on :city
   search_on :state
-  search_on :post_code  
+  search_on :post_code
 end
