@@ -94,6 +94,24 @@ describe SearchMagic::FullTextSearch do
         its(:part_number) { should_not be_nil }
         its(:searchable_values) { should include("part_number:t11001", "category_name:table", "status:available", "serial:t0411001") }
       end
+      
+      context "when searching for 'category_name:table'" do
+        subject { Part.search("category_name:table").map(&:serial) }
+        its(:count) { should == 4 }
+        it { should include("T0411001", "T0511010", "T0411037", "T0511178") }
+      end
+      
+      context "when searching for 'broken chair'" do
+        subject { Part.search("broken chair").map(&:serial) }
+        its(:count) { should == 2 }
+        it { should include("C0511010", "C0511010") }
+      end
+      
+      context "when searching for 'part_number:T11001'" do
+        subject { Part.search("part_number:T11001").map(&:serial) }
+        its(:count) { should == 2 }
+        it { should include("T0411001", "T0511010") }
+      end
     end
   end
 end
