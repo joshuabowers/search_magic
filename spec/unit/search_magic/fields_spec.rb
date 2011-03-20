@@ -25,7 +25,7 @@ describe SearchMagic::FullTextSearch do
     its("searchable_fields.keys") { should include(:title, :description, :tags) }
     its("searchable_fields.keys") { should_not include(:uuid) }
     
-    its(:searchables) { should include(:title, :description, :tags) }
+    its(:searchables) { should include(:title, :description, :tag) }
     its(:searchables) { should_not include(:uuid) }
   end
   
@@ -42,7 +42,7 @@ describe SearchMagic::FullTextSearch do
     its(:_searchable_values) { should include("title:foo", "title:bar", "title:the", "title:bazzening")}
     its(:_searchable_values) { should include("description:sequel", "description:to", "description:last", "description:years", "description:hit", "description:summer", "description:blockbuster")}
     its(:_searchable_values) { should_not include("uuid:ae9d14ee-be93-11df-9fec-78ca39fffe11", "uuid:ae9d14ee")}
-    its(:_searchable_values) { should include("tags:movies", "tags:foo.bar", "tags:the-bazzening")}
+    its(:_searchable_values) { should include("tag:movies", "tag:foo.bar", "tag:the-bazzening")}
   end
   
   context "when :search is performed on a model without :searchables" do
@@ -93,14 +93,14 @@ describe SearchMagic::FullTextSearch do
       its(:count) { should == 0 }
     end
     
-    context "when searching for 'tags:foo.bar'" do
-      subject { Asset.search("tags:foo.bar").map(&:title) }
+    context "when searching for 'tag:foo.bar'" do
+      subject { Asset.search("tag:foo.bar").map(&:title) }
       its(:count) { should == 1 }
       its(:first) { should == "Foo Bar: The Bazzening" }
     end
     
-    context "when searching for 'tags:movies cheese" do
-      subject { Asset.search("tags:movies cheese").map(&:title) }
+    context "when searching for 'tag:movies cheese" do
+      subject { Asset.search("tag:movies cheese").map(&:title) }
       its(:count) { should == 1 }
       its(:first) { should == "Cheese of the Damned" }
     end
