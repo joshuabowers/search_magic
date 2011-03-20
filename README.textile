@@ -1,0 +1,13 @@
+h1. SearchMagic
+
+SearchMagic provides full-text search capabilities to "mongoid":"github.com/mongoid/mongoid" documents, embedded documents, and referenced documents with a clean, consistent, and easy to use syntax. Searching can be performed on either word fragments, such as @foo@, or can use a selector-syntax, @foo:bar@, to target which fields of the document the search is to be restricted to.
+
+h2. Installation
+
+SearchMagic is built on top of the latest pre-release version of mongoid; in all likelihood, it will only work with versions greater than or equal to @2.0.0.rc.7@. For environments where bundler is being used, it can be installed by adding the following to your Gemfile and running @bundle@.
+
+bc. gem 'search_magic'
+
+h2. Getting Started
+
+h2. Problems?
