@@ -46,6 +46,23 @@ describe SearchMagic::FullTextSearch do
       its(:count) { should == 1 }
       its("first.name") { should == "Samuel" }
     end
+    
+    context "when searching for 'mobile_numbers:555-'" do
+      subject { Person.search("mobile_numbers:555-") }
+      its(:count) { should == 2 }
+    end
+    
+    context "when searching for 'mobile_numbers:333-'" do
+      subject { Person.search("mobile_numbers:333-") }
+      its(:count) { should == 1 }
+      its("first.name") { should == "Joshua" }
+    end
+    
+    context "when searching for 'mobile_numbers:-0987'" do
+      subject { Person.search("mobile_numbers:-0987") }
+      its(:count) { should == 1 }
+      its("first.name") { should == "Samuel" }
+    end
   end
   
   context "when a model references other documents" do
