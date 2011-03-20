@@ -39,6 +39,11 @@ module SearchMagic
       def update_searchable_values
         send :searchable_values=, self.searchable_fields.values.map {|metadata| metadata.searchable_value(self)}.flatten
       end
+      
+      def method_missing(name, *args, &block)
+        values = self.searchable_values.grep(/^#{name}:(.*)/){$1}
+        values.blank? ? super : values.first
+      end
     end
     
     class Metadata
@@ -57,18 +62,22 @@ module SearchMagic
       end
       
       def searchable_names(model)
-        name = options[:as] || self.field_name
+        name = options[:skip_prefix].presence ? nil : (options[:as] || self.field_name)
         value = model.present? ? model.send(self.field_name) : nil
-        fields = self.association.class_name.constantize.searchable_fields.keys if self.association
+        fields = self.association.class_name.constantize.searchables if self.association
         fields = (fields - options[:except]) & (options[:only].blank? ? fields : options[:only]) if fields
         case self.association.try(:macro)
         when nil
           [[self.field.type == Array ? name.to_s.singularize.to_sym : name, value, nil]]
         when :embedded_in, :embeds_one, :referenced_in, :references_one
-          fields.map {|sub_name| [:"#{name}_#{sub_name}", value, sub_name]}
+          fields.map {|sub_name| [create_nested_name(name, sub_name), value, sub_name]}
         else
-          fields.map {|sub_name| [:"#{name.to_s.singularize}_#{sub_name.to_s.pluralize}", value, sub_name]}
+          fields.map {|sub_name| [create_nested_name(name.to_s.singularize, sub_name.to_s.pluralize), value, sub_name]}
         end
+      end
+      
+      def create_nested_name(owning_name, sub_name)
+        [owning_name, sub_name].compact.join("_").to_sym
       end
       
       def value_for(searchable_name, value, field_name)

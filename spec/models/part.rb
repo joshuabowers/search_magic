@@ -8,5 +8,5 @@ class Part
   
   search_on :serial
   search_on :status
-  search_on :part_category, :as => :category, :through => :part_number
+  search_on :part_number, :skip_prefix => true
 end
