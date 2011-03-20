@@ -6,5 +6,5 @@ class Phone
   embedded_in :person
   
   search_on :country_code
-  search_on :number
+  search_on :number, :keep_punctuation => true
 end

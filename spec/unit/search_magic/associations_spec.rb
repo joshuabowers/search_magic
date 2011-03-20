@@ -17,14 +17,21 @@ describe SearchMagic::FullTextSearch do
   
   context "when a model embeds one other document" do
     before(:each) do
-      Person.create(:name => "Joshua", :address => {:street => "123 Example St.", :city => "Nowhereland", :state => "CA", :post_code => 12345})
-      Person.create(:name => "Samuel", :address => {:street => "4010 Arbitrary Ave.", :city => "Somewhere", :state => "MO", :post_code => 54321})
+      Person.create(:name => "Joshua", :address => {:street => "123 Example St.", :city => "Nowhereland", :state => "CA", :post_code => 12345}, :phones => [{:country_code => 1, :number => "555-1234"}, {:country_code => 2, :number => "333-7890"}])
+      Person.create(:name => "Samuel", :address => {:street => "4010 Arbitrary Ave.", :city => "New Somewhere", :state => "MO", :post_code => 54321}, :phones => [{:country_code => 5, :number => "444-4321"}, {:country_code => 1, :number => "555-0987"}])
     end
     
     describe "model should have embedded document fields in :searchable_values" do
       subject { Person.where(:name => "Joshua").first }
       its(:address) { should_not be_nil }
+      its(:phones) { should_not be_empty }
       its(:searchable_values) { should include("address_street:123", "address_street:example", "address_street:st") }
+      it { should respond_to(:_address_street, :_address_city, :_address_state, :_address_post_code, :_mobile_numbers)}
+      its(:_address_street) { should include("123", "example", "st") }
+      its(:_address_state) { should == "ca" }
+      its(:_address_city) { should == "nowhereland" }
+      its(:_address_post_code) { should == "12345" }
+      its(:_mobile_numbers) { should include("555-1234", "333-7890") }
     end
     
     context "when searching for 'address_city:nowhereland'" do
@@ -93,6 +100,10 @@ describe SearchMagic::FullTextSearch do
         it { should be }
         its(:part_number) { should_not be_nil }
         its(:searchable_values) { should include("part_number:t11001", "category_name:table", "status:available", "serial:t0411001") }
+        its(:_part_number) { should == "t11001" }
+        its(:_category_name) { should == "table" }
+        its(:_status) { should == "available" }
+        its(:_serial) { should == "T0411001" }
       end
       
       context "when searching for 'category_name:table'" do
