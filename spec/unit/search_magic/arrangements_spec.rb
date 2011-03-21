@@ -1,0 +1,82 @@
+require 'spec_helper'
+
+describe SearchMagic::FullTextSearch do
+  context "when included in a model without :searchables" do
+    subject { NoSearchables }
+    its("fields.keys") { should include("arrangeable_values") }
+    describe "arrangeable_values" do
+      subject { NoSearchables.fields["arrangeable_values"] }
+      its(:type) { should == Hash }
+      its(:default) { should == {} }
+    end
+    
+    it { should respond_to(:arrange).with(2).argument }
+  end
+  
+  describe "saving a model should run the :update_arrangeable_values callback" do
+    subject { Asset.new }
+    after(:each) { subject.save }
+    it { subject.should_receive :update_arrangeable_values }
+  end
+  
+  context "when a model is saved, its :arrangeable_values update" do
+    subject { Asset.new(:title => "Foo Bar: The Bazzening", :description => "Sequel to last years hit summer blockbuster.", :tags => ["movies", "foo.bar", "the-bazzening"], :uuid => "ae9d14ee-be93-11df-9fec-78ca39fffe11")}
+    before(:each) { subject.save }
+    its(:arrangeable_values) { should_not be_empty }
+    its(:arrangeable_values) { should include(:title => "Foo Bar: The Bazzening") }
+    its(:arrangeable_values) { should include(:description => "Sequel to last years hit summer blockbuster.", ) }
+    its(:arrangeable_values) { should include(:tag => ["movies", "foo.bar", "the-bazzening"]) }
+    its("arrangeable_values.keys") { should_not include(:uuid) }
+  end
+  
+  context "when :arrange is performed on a model with :searchables" do
+    before(:each) do
+      Asset.create(:title => "Foo Bar: The Bazzening", :description => "Sequel to last years hit summer blockbuster.", :tags => ["movies", "suspense", "foo.bar", "the-bazzening"])
+      Asset.create(:title => "Undercover Foo", :description => "When a foo goes undercover, how far will he go to protect those he loves?", :tags => ["movies", "action", "undercover.foo"])
+      Asset.create(:title => "Cheese of the Damned", :description => "This is not your father's munster.", :tags => ["movies", "horror", "cheese", "munster"])
+    end
+    
+    context "when arranging a model by nil" do
+      subject { Asset.arrange(nil) }
+      it { should be_a(Mongoid::Criteria) }
+      its(:options) { should be_empty }
+      its("options.keys") { should_not include(:sort) }
+    end
+    
+    context "when arranging a model by ''" do
+      subject { Asset.arrange("") }
+      it { should be_a(Mongoid::Criteria) }
+      its(:options) { should be_empty }
+      its("options.keys") { should_not include(:sort) }
+    end
+    
+    context "when arranging a model by a non searchable" do
+      subject { Asset.arrange(:is_not_searchable) }
+      it { should be_a(Mongoid::Criteria) }
+      its(:options) { should be_empty }
+      its("options.keys") { should_not include(:sort) }
+    end
+    
+    context "when arranging a model by a searchable" do
+      subject { Asset.arrange(:title) }
+      it { should be_a(Mongoid::Criteria) }
+      its(:options) { should_not be_empty }
+      its(:options) { should include(:sort => ["arrangeable_values.title", :asc]) }
+    end
+    
+    context "when arranging a model by 'title'" do
+      subject { Asset.arrange(:title).map(&:title) }
+      it { should == ["Cheese of the Damned", "Foo Bar: The Bazzening", "Undercover Foo"] }
+    end
+    
+    context "when arranging a model by 'description'" do
+      subject { Asset.arrange(:description).map(&:title) }
+      it { should == ["Foo Bar: The Bazzening", "Cheese of the Damned", "Undercover Foo"] }
+    end
+    
+    context "when arranging a model by 'tag'" do
+      subject { Asset.arrange(:tag).map(&:title) }
+      it { should == ["Undercover Foo", "Cheese of the Damned", "Foo Bar: The Bazzening"] }
+    end
+  end
+end

@@ -5,7 +5,9 @@ module SearchMagic
         receiver.send :class_attribute, :searchable_fields, :instance_writer => false
         receiver.send :searchable_fields=, {}
         receiver.send :field, :searchable_values, :type => Array, :default => []
+        receiver.send :field, :arrangeable_values, :type => Hash, :default => {}
         receiver.send :before_save, :update_searchable_values
+        receiver.send :before_save, :update_arrangeable_values
       end
       
       def search_on(field_name, options = {})
@@ -29,6 +31,10 @@ module SearchMagic
         else
           criteria
         end
+      end
+      
+      def arrange(arrangeable, direction = :asc)
+        arrangeable.blank? || !searchables.keys.include?(arrangeable) ? criteria : order_by(["arrangeable_values.#{arrangeable}", direction])
       end
       
       private 
@@ -62,31 +68,12 @@ module SearchMagic
       def update_searchable_values
         self.searchable_values = self.class.searchables.values.map {|metadata| metadata.searchable_value_for(self)}.flatten
       end
-    end
-    
-    class Metadata
-      attr_accessor :type, :through, :prefix, :field_name, :options
-
-      def initialize(attributes = {})
-        attributes.each do |key, value|
-          send(:"#{key}=", value)
+      
+      def update_arrangeable_values
+        self.arrangeable_values = {}
+        self.class.searchables.values.each do |metadata|
+          self.arrangeable_values[metadata.name] = metadata.arrangeable_value_for(self)
         end
-      end
-      
-      def name
-        @name ||= [options[:skip_prefix].presence ? nil : (prefix.present? ? options[:as] || prefix : nil), 
-                  prefix.present? ? field_name : (options[:as] || field_name)].compact.join("_").to_sym
-      end
-      
-      def value_for(obj)
-        v = self.through.call(obj)
-        v = v.is_a?(Array) ? v.join(" ") : v.to_s
-        v = v.gsub(/[[:punct:]]/, ' ') unless options[:keep_punctuation]
-        v
-      end
-      
-      def searchable_value_for(obj)
-        value_for(obj).downcase.split.map {|word| [name, word].join(":")}
       end
     end
   

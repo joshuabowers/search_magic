@@ -35,7 +35,7 @@ describe SearchMagic::FullTextSearch do
     it { subject.should_receive :update_searchable_values }
   end
   
-  context "when a model is saved, its :_searchable_values update" do
+  context "when a model is saved, its :searchable_values update" do
     subject { Asset.new(:title => "Foo Bar: The Bazzening", :description => "Sequel to last years hit summer blockbuster.", :tags => ["movies", "foo.bar", "the-bazzening"], :uuid => "ae9d14ee-be93-11df-9fec-78ca39fffe11")}
     before(:each) { subject.save }
     its(:searchable_values) { should_not be_empty }
