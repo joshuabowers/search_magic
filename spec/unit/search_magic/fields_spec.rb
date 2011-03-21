@@ -25,8 +25,8 @@ describe SearchMagic::FullTextSearch do
     its("searchable_fields.keys") { should include(:title, :description, :tags) }
     its("searchable_fields.keys") { should_not include(:uuid) }
     
-    its(:searchables) { should include(:title, :description, :tag) }
-    its(:searchables) { should_not include(:uuid) }
+    its("searchables.keys") { should include(:title, :description, :tag) }
+    its("searchables.keys") { should_not include(:uuid) }
   end
   
   describe "saving a model should run the :update_searchable_values callback" do
