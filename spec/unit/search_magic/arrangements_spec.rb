@@ -64,6 +64,13 @@ describe SearchMagic::FullTextSearch do
       its(:options) { should include(:sort => [["arrangeable_values.title", :asc]]) }
     end
     
+    context "when arranging a model by a searchable.to_s" do
+      subject { Asset.arrange("title") }
+      it { should be_a(Mongoid::Criteria) }
+      its(:options) { should_not be_empty }
+      its(:options) { should include(:sort => [["arrangeable_values.title", :asc]]) }
+    end
+    
     context "when arranging a model on multiple searchables" do
       subject { Asset.arrange(:title).arrange(:tag) }
       it { should be_a(Mongoid::Criteria) }
