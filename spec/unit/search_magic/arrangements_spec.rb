@@ -64,19 +64,23 @@ describe SearchMagic::FullTextSearch do
       its(:options) { should include(:sort => ["arrangeable_values.title", :asc]) }
     end
     
-    context "when arranging a model by 'title'" do
-      subject { Asset.arrange(:title).map(&:title) }
-      it { should == ["Cheese of the Damned", "Foo Bar: The Bazzening", "Undercover Foo"] }
+    shared_examples_for "arranged assets" do |arrangeable, direction, expected_order|
+      context "when arranging a model by '#{arrangeable}' => '#{direction || 'nil'}'" do
+        subject { (direction.present? ? Asset.arrange(arrangeable, direction) : Asset.arrange(arrangeable)).map(&:title) }
+        it { should == expected_order }
+      end      
     end
     
-    context "when arranging a model by 'description'" do
-      subject { Asset.arrange(:description).map(&:title) }
-      it { should == ["Foo Bar: The Bazzening", "Cheese of the Damned", "Undercover Foo"] }
-    end
+    it_should_behave_like "arranged assets", :title, nil, ["Cheese of the Damned", "Foo Bar: The Bazzening", "Undercover Foo"]
+    it_should_behave_like "arranged assets", :description, nil, ["Foo Bar: The Bazzening", "Cheese of the Damned", "Undercover Foo"]
+    it_should_behave_like "arranged assets", :tag, nil, ["Undercover Foo", "Cheese of the Damned", "Foo Bar: The Bazzening"]
     
-    context "when arranging a model by 'tag'" do
-      subject { Asset.arrange(:tag).map(&:title) }
-      it { should == ["Undercover Foo", "Cheese of the Damned", "Foo Bar: The Bazzening"] }
-    end
+    it_should_behave_like "arranged assets", :title, :asc, ["Cheese of the Damned", "Foo Bar: The Bazzening", "Undercover Foo"]
+    it_should_behave_like "arranged assets", :description, :asc, ["Foo Bar: The Bazzening", "Cheese of the Damned", "Undercover Foo"]
+    it_should_behave_like "arranged assets", :tag, :asc, ["Undercover Foo", "Cheese of the Damned", "Foo Bar: The Bazzening"]
+    
+    it_should_behave_like "arranged assets", :title, :desc, ["Undercover Foo", "Foo Bar: The Bazzening", "Cheese of the Damned"]
+    it_should_behave_like "arranged assets", :description, :desc, ["Undercover Foo", "Cheese of the Damned", "Foo Bar: The Bazzening"]
+    it_should_behave_like "arranged assets", :tag, :desc, ["Foo Bar: The Bazzening", "Cheese of the Damned", "Undercover Foo"]
   end
 end
