@@ -34,7 +34,7 @@ module SearchMagic
       end
       
       def arrange(arrangeable, direction = :asc)
-        arrangeable.blank? || !searchables.keys.include?(arrangeable) ? criteria : order_by(["arrangeable_values.#{arrangeable}", direction])
+        arrangeable.blank? || !searchables.keys.include?(arrangeable) ? criteria : order_by([["arrangeable_values.#{arrangeable}", direction]])
       end
       
       private 
