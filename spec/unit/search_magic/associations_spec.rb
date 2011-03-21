@@ -6,7 +6,6 @@ describe SearchMagic::FullTextSearch do
     it { subject.searchable_fields.keys.should include(:address) }
     it { subject.searchable_fields.keys.should include(:phones) }
     it { should respond_to(:searchables)}
-    # its(:searchables) { should include(:address_street, :address_city, :address_state, :address_post_code, :mobile_numbers)}
     its("searchables.keys") { should include(:address_street, :address_city, :address_state, :address_post_code, :mobile_number)}
     its("searchables.keys") { should_not include(:mobile_country_code)}
   end
@@ -14,7 +13,6 @@ describe SearchMagic::FullTextSearch do
   describe "model includes referenced document fields in :searchable_fields" do
     subject { Part }
     it { subject.searchable_fields.keys.should include(:part_number) }
-    # its(:searchables) { should include(:part_number, :category_name) }
     its("searchables.keys") { should include(:part_number, :category_name) }
   end
   
@@ -29,12 +27,6 @@ describe SearchMagic::FullTextSearch do
       its(:address) { should_not be_nil }
       its(:phones) { should_not be_empty }
       its(:searchable_values) { should include("address_street:123", "address_street:example", "address_street:st") }
-      # it { should respond_to(:_address_street, :_address_city, :_address_state, :_address_post_code, :_mobile_numbers)}
-      # its(:_address_street) { should include("123", "example", "st") }
-      # its(:_address_state) { should == "ca" }
-      # its(:_address_city) { should == "nowhereland" }
-      # its(:_address_post_code) { should == "12345" }
-      # its(:_mobile_numbers) { should include("555-1234", "333-7890") }
     end
     
     context "when searching for 'address_city:nowhereland'" do
@@ -120,10 +112,6 @@ describe SearchMagic::FullTextSearch do
         it { should be }
         its(:part_number) { should_not be_nil }
         its(:searchable_values) { should include("part_number:t11001", "category_name:table", "status:available", "serial:t0411001") }
-        # its(:_part_number) { should == "t11001" }
-        # its(:_category_name) { should == "table" }
-        # its(:_status) { should == "available" }
-        # its(:_serial) { should == "T0411001" }
       end
       
       context "when searching for 'category_name:table'" do
