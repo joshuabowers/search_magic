@@ -29,9 +29,13 @@ bc.. class Address
   search_on :post_code
 end
 
-p. At this point, *Address* can be searched by calling its @:search@ method:
+p. At this point, *Address* can be searched by calling its _*:search*_ method:
 
 bc. Address.search("state:ca")
+
+It is also possible to sort models on fields which have been marked as searchable through the _*:arrange*_ method:
+
+bc. Address.arrange(:state, :asc)
 
 h3. :search_on
 
@@ -123,6 +127,18 @@ Using the models defined in the previous section, the following searches are all
 bc. Part.search("table") # full text search on "table"
 Part.search("category_name:table") # restricts the search for "table" to "category_name"
 Part.search("bike serial:b1234") # full text search on "bike", with an extra requirement that the serial be "b1234"
+
+h3. :arrange
+
+SearchMagic also provides a utility scope for arranging the model by the searchables defined within it. This method, _*:arrange*_, has one required parameter specifying the searchable to sort on and one optional parameter specifying the sort direction. (If the second parameter is omitted, it will default to ascending.)
+
+bc. Part.arrange(:serial)
+Part.arrange(:serial, :asc) # same as last example
+Part.arrange(:category_name, :desc) # arrange the parts in descending order by :category_name
+
+As mentioned, _*:arrange*_ is a scope, so it can be chained with other scopes on a given model:
+
+bc. Part.search("category_name:table").arrange(:serial, :asc)
 
 h2. Problems? Comments?
 
