@@ -16,6 +16,18 @@ describe SearchMagic::FullTextSearch do
     its("searchables.keys") { should include(:part_number, :category_name) }
   end
   
+  context "when a model excludes an associated documents fields" do
+    subject { Game }
+    its("searchables.keys") { should include(:title, :price, :high_score, :developer_name) }
+    its("searchables.keys") { should_not include(:developer_opened_on) }
+  end
+  
+  context "when a model only includes certain fields from an associated document" do
+    subject { Player }
+    its("searchables.keys") { should include(:name, :game_title, :game_developer_name) }
+    its("searchables.keys") { should_not include(:game_price, :game_high_score, :game_developer_opened_on)}
+  end
+  
   context "when a model embeds one other document" do
     before(:each) do
       Person.create(:name => "Joshua", :address => {:street => "123 Example St.", :city => "Nowhereland", :state => "CA", :post_code => 12345}, :phones => [{:country_code => 1, :number => "555-1234"}, {:country_code => 2, :number => "333-7890"}])

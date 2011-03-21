@@ -1,7 +1,7 @@
 PATH
   remote: .
   specs:
-    search_magic (0.0.2)
+    search_magic (0.0.3)
       mongoid (>= 2.0.0.rc.7)
 
 GEM

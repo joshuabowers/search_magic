@@ -38,9 +38,10 @@ module SearchMagic
           if association = reflect_on_association(field_name)
             options[:as] ||= nil
             only = [options[:only]].flatten.compact
-            except = [options[:except]].flatten.compact
-            associated = association.class_name.constantize.searchables.reject {|key, value| except.include?(key) }.select {|key, value| only.blank? ? true : only.include?(key) }
-            associated.map do |name, metadata|
+            except = [:_D_E_A_D_B_3_3_F_, options[:except]].flatten.compact
+            associated = association.class_name.constantize.searchables
+            wanted = associated.keys.grep(/^(?!.*?(#{except.join("|")})).*/).grep(/^#{only.join("|")}/)
+            associated.select {|key, value| wanted.include?(key)}.map do |name, metadata|
               Metadata.new(:type => self, :through => lambda do |obj|
                 value = obj.send(field_name)
                 value.is_a?(Array) ? value.map {|item| metadata.through.call(item)} : metadata.through.call(value)
@@ -60,11 +61,6 @@ module SearchMagic
       
       def update_searchable_values
         self.searchable_values = self.class.searchables.values.map {|metadata| metadata.searchable_value_for(self)}.flatten
-      end
-      
-      def find_searchable_value(name)
-        matches = self.searchable_values.grep(/^#{name}:(.*)/){$1}
-        matches.count == 1 ? matches.first : matches
       end
     end
     
