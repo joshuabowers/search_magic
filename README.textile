@@ -33,9 +33,9 @@ bc.. class Address
   search_on :post_code
 end
 
-p. At this point, *Address* can be searched by calling its _*:search*_ method:
+p. At this point, *Address* can be searched by calling its _*:search_for*_ method:
 
-bc. Address.search("state:ca")
+bc. Address.search_for("state:ca")
 
 It is also possible to sort models on fields which have been marked as searchable through the _*:arrange*_ method:
 
@@ -90,6 +90,7 @@ Finally, it should be noted that nesting of searchable documents is possible. (C
 
 bc.. class Part
   include Mongoid::Document
+  include Mongoid::Timestamps
   include SearchMagic::FullTextSearch
   field :serial
   references_in :part_number
@@ -120,17 +121,25 @@ end
 
 p. *PartNumber* will be able to search on both _:number_ and _:category_name_. *Part*, on the other hand, will absorb all of the searchable fields of PartNumber, including its associations. So, it can be searched on _:serial_, _:number_, and _:category_name_
 
-h3. :search
+h3. :search_for
 
-Searching a model with SearchMagic is simple: each model gains a class method called _:search_ which accepts one parameter, the search pattern. This method is a "mongoid scope":http://mongoid.org/docs/querying/; it will always return a criteria object after executing. As such, it plays nicely with other scopes on your models.
+Searching a model with SearchMagic is simple: each model gains a class method called _*:search_for*_ which accepts one parameter, the search pattern. This method is a "mongoid scope":http://mongoid.org/docs/querying/; it will always return a criteria object after executing. As such, it plays nicely with other scopes on your models.
 
 SearchMagic expects the incoming _pattern_ to be a string containing whitespace delimited phrases. Each phrase can either be a single word, or a _selector:value_ pair. Multiple phrases will narrow the search field: each additional phrase places an additional requirement on a matching document. Single word phrases are matched across all entries in a model's _:searchable_values_ array. The pairs, on the other hand, restrict the search for _value_ against only those entries which match _selector_. In either case, _word_ or _value_ may contain fragments of whole entries stored within _:searchable_values_.
 
 Using the models defined in the previous section, the following searches are all perfectly valid:
 
-bc. Part.search("table") # full text search on "table"
-Part.search("category_name:table") # restricts the search for "table" to "category_name"
-Part.search("bike serial:b1234") # full text search on "bike", with an extra requirement that the serial be "b1234"
+bc. Part.search_for("table") # full text search on "table"
+Part.search_for("category_name:table") # restricts the search for "table" to "category_name"
+Part.search_for("bike serial:b1234") # full text search on "bike", with an extra requirement that the serial be "b1234"
+
+As _*:search_for*_ is a scope, it can be called on any previous scope within the call chain:
+
+bc. Part.where(:created_at.gt => 1.day.ago.time).search_for("table")
+
+_*:search_for*_ can be called multiple times within the same scope chain. Doing so will append each successive pattern to the previous searches. Effectively, this is the same as performing a single _*:search_for*_ with whitespace delimited terms in the pattern. To make such expressions slightly more readable, _*:search_for*_ is aliased as _*:and_for*_:
+
+bc. Part.search_for("bike").and_for("serial:b1234")
 
 h3. :arrange
 
@@ -142,7 +151,7 @@ Part.arrange(:category_name, :desc) # arrange the parts in descending order by :
 
 As mentioned, _*:arrange*_ is a scope, so it can be chained with other scopes on a given model:
 
-bc. Part.search("category_name:table").arrange(:serial, :asc)
+bc. Part.search_for("category_name:table").arrange(:serial, :asc)
 
 h2. Problems? Comments?
 

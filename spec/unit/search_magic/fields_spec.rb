@@ -17,7 +17,8 @@ describe SearchMagic::FullTextSearch do
       its(:default) { should == [] }
     end
     
-    it { should respond_to(:search).with(1).argument }
+    it { should respond_to(:search_for).with(1).argument }
+    it { should respond_to(:and_for).with(1).argument }
   end
   
   context "when :search_on called with [:title, :description, :tags]" do
@@ -46,7 +47,7 @@ describe SearchMagic::FullTextSearch do
   end
   
   context "when :search is performed on a model without :searchables" do
-    subject { NoSearchables.search("foo") }
+    subject { NoSearchables.search_for("foo") }
     it { should be_a(Mongoid::Criteria) }
     its(:count) { should == 0 }
   end
@@ -59,50 +60,74 @@ describe SearchMagic::FullTextSearch do
     end
 
     context "when searching for nil" do
-      subject { Asset.search(nil) }
+      subject { Asset.search_for(nil) }
       it { should be_a(Mongoid::Criteria) }
       its("selector.keys") { should_not include(:searchable_values) }
     end
     
     context "when searching on an empty string" do
-      subject { Asset.search("") }
+      subject { Asset.search_for("") }
       it { should be_a(Mongoid::Criteria) }
       its("selector.keys") { should_not include(:searchable_values) }
     end
     
     context "when searching for anything" do
-      subject { Asset.search("foo") }
+      subject { Asset.search_for("foo") }
       it { should be_a(Mongoid::Criteria) }
       its("selector.keys") { should include(:searchable_values) }
     end
     
     context "when searching for 'foo'" do
-      subject { Asset.search("foo").map(&:title) }
+      subject { Asset.search_for("foo").map(&:title) }
       its(:count) { should == 2 }
       it { should include("Foo Bar: The Bazzening", "Undercover Foo") }
     end
     
     context "when searching for 'title:foo'" do
-      subject { Asset.search("title:foo").map(&:title) }
+      subject { Asset.search_for("title:foo").map(&:title) }
       its(:count) { should == 2 }
       it { should include("Foo Bar: The Bazzening", "Undercover Foo") }
     end
     
     context "when searching for 'description:bazzening'" do
-      subject { Asset.search("description:bazzening") }
+      subject { Asset.search_for("description:bazzening") }
       its(:count) { should == 0 }
     end
     
     context "when searching for 'tag:foo.bar'" do
-      subject { Asset.search("tag:foo.bar").map(&:title) }
+      subject { Asset.search_for("tag:foo.bar").map(&:title) }
       its(:count) { should == 1 }
       its(:first) { should == "Foo Bar: The Bazzening" }
     end
     
     context "when searching for 'tag:movies cheese" do
-      subject { Asset.search("tag:movies cheese").map(&:title) }
+      subject { Asset.search_for("tag:movies cheese").map(&:title) }
       its(:count) { should == 1 }
       its(:first) { should == "Cheese of the Damned" }
+    end
+    
+    context "when chaining a search for 'foo' off of :all" do
+      subject { Asset.all.search_for("foo").map(&:title) }
+      its(:count) { should == 2 }
+      it { should include("Foo Bar: The Bazzening", "Undercover Foo") }
+    end
+
+    context "when chaining a search for 'foo' off of a search for 'bar'" do
+      subject { Asset.search_for("bar").search_for("foo").map(&:title) }
+      its(:count) { should == 1 }
+      it { should == ["Foo Bar: The Bazzening"] }
+    end
+    
+    context "when chaining a search for 'foo' off of a search for 'bar' using :and_for" do
+      subject { Asset.search_for("bar").and_for("foo").map(&:title) }
+      its(:count) { should == 1 }
+      it { should == ["Foo Bar: The Bazzening"] }
+    end
+    
+    context "when chaining a search for 'foo' off of :arrange" do
+      subject { Asset.arrange(:title, :desc).search_for("foo").map(&:title) }
+      its(:count) { should == 2 }
+      it { should include("Undercover Foo", "Foo Bar: The Bazzening") }
     end
   end
 end

@@ -42,31 +42,31 @@ describe SearchMagic::FullTextSearch do
     end
     
     context "when searching for 'address_city:nowhereland'" do
-      subject { Person.search("address_city:nowhereland") }
+      subject { Person.search_for("address_city:nowhereland") }
       its("selector.keys") { should include(:searchable_values) }
       its(:count) { should == 1 }
       its("first.name") { should == "Joshua" }
     end
     
     context "when searching for 'arbitrary address_post_code:54321'" do
-      subject { Person.search("arbitrary address_post_code:54321") }
+      subject { Person.search_for("arbitrary address_post_code:54321") }
       its(:count) { should == 1 }
       its("first.name") { should == "Samuel" }
     end
     
     context "when searching for 'mobile_number:555-'" do
-      subject { Person.search("mobile_number:555-") }
+      subject { Person.search_for("mobile_number:555-") }
       its(:count) { should == 2 }
     end
     
     context "when searching for 'mobile_number:333-'" do
-      subject { Person.search("mobile_number:333-") }
+      subject { Person.search_for("mobile_number:333-") }
       its(:count) { should == 1 }
       its("first.name") { should == "Joshua" }
     end
     
     context "when searching for 'mobile_number:-0987'" do
-      subject { Person.search("mobile_number:-0987") }
+      subject { Person.search_for("mobile_number:-0987") }
       its(:count) { should == 1 }
       its("first.name") { should == "Samuel" }
     end
@@ -105,13 +105,13 @@ describe SearchMagic::FullTextSearch do
       end
     
       context "when searching for 'category_name:table'" do
-        subject { PartNumber.search("category_name:table").map(&:value) }
+        subject { PartNumber.search_for("category_name:table").map(&:value) }
         its(:count) { should == 2 }
         it { should include("T11001", "T11002") }
       end
     
       context "when searching for '11001'" do
-        subject { PartNumber.search("11001").map(&:value) }
+        subject { PartNumber.search_for("11001").map(&:value) }
         its(:count) { should == 2 }
         it { should include("T11001", "C11001") }
       end
@@ -127,19 +127,19 @@ describe SearchMagic::FullTextSearch do
       end
       
       context "when searching for 'category_name:table'" do
-        subject { Part.search("category_name:table").map(&:serial) }
+        subject { Part.search_for("category_name:table").map(&:serial) }
         its(:count) { should == 4 }
         it { should include("T0411001", "T0511010", "T0411037", "T0511178") }
       end
       
       context "when searching for 'broken chair'" do
-        subject { Part.search("broken chair").map(&:serial) }
+        subject { Part.search_for("broken chair").map(&:serial) }
         its(:count) { should == 2 }
         it { should include("C0511010", "C0511010") }
       end
       
       context "when searching for 'part_number:T11001'" do
-        subject { Part.search("part_number:T11001").map(&:serial) }
+        subject { Part.search_for("part_number:T11001").map(&:serial) }
         its(:count) { should == 2 }
         it { should include("T0411001", "T0511010") }
       end

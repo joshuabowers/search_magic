@@ -27,7 +27,7 @@ module SearchMagic
           map(&:name)
       end
       
-      def search(pattern)
+      def search_for(pattern)
         rval = /("[^"]+"|\S+)/
         rsearch = /(?:(#{searchables.keys.join('|')}):#{rval})|#{rval}/i
         unless pattern.blank?
@@ -41,6 +41,7 @@ module SearchMagic
           criteria
         end
       end
+      alias :and_for :search_for
       
       def arrange(arrangeable, direction = :asc)
         arrangeable.blank? || !searchables.keys.include?(arrangeable.to_sym) ? criteria : order_by([["arrangeable_values.#{arrangeable}", direction]])
