@@ -1,16 +1,18 @@
 module SearchMagic
   module FullTextSearch
+    extend ActiveSupport::Concern
+    
+    included do
+      class_attribute :searchable_fields, :instance_writer => false
+      self.searchable_fields = {}
+      field :searchable_values, :type => Array, :default => []
+      field :arrangeable_values, :type => Hash, :default => {}
+      before_save :update_searchable_values
+      before_save :update_arrangeable_values
+      after_save :update_associated_documents
+    end
+    
     module ClassMethods
-      def self.extended(receiver)
-        receiver.send :class_attribute, :searchable_fields, :instance_writer => false
-        receiver.send :searchable_fields=, {}
-        receiver.send :field, :searchable_values, :type => Array, :default => []
-        receiver.send :field, :arrangeable_values, :type => Hash, :default => {}
-        receiver.send :before_save, :update_searchable_values
-        receiver.send :before_save, :update_arrangeable_values
-        receiver.send :after_save, :update_associated_documents
-      end
-      
       def search_on(field_name, options = {})
         searchable_fields[field_name] = options
       end
@@ -69,30 +71,23 @@ module SearchMagic
       end
     end
   
-    module InstanceMethods      
-      private
-      
-      def update_searchable_values
-        self.searchable_values = self.class.searchables.values.map {|metadata| metadata.searchable_value_for(self)}.flatten
-      end
-      
-      def update_arrangeable_values
-        self.arrangeable_values = Hash[*self.class.searchables.map {|key, metadata|
-          [key, metadata.arrangeable_value_for(self)]
-          }.flatten(1)]
-      end
-      
-      def update_associated_documents
-        self.class.inverse_searchables.each do |relation_name|
-          relation = send(relation_name)
-          (relation.is_a?(Array) ? relation : [relation]).each(&:save!)
-        end
-      end
+    private
+    
+    def update_searchable_values
+      self.searchable_values = self.class.searchables.values.map {|metadata| metadata.searchable_value_for(self)}.flatten
     end
-  
-    def self.included(receiver)
-      receiver.extend         ClassMethods
-      receiver.send :include, InstanceMethods
+    
+    def update_arrangeable_values
+      self.arrangeable_values = Hash[*self.class.searchables.map {|key, metadata|
+        [key, metadata.arrangeable_value_for(self)]
+        }.flatten(1)]
+    end
+    
+    def update_associated_documents
+      self.class.inverse_searchables.each do |relation_name|
+        relation = send(relation_name)
+        (relation.is_a?(Array) ? relation : [relation]).each(&:save!)
+      end
     end
   end
 end
