@@ -1,6 +1,6 @@
 module SearchMagic
   class Metadata
-    attr_accessor :type, :through, :prefix, :field_name, :options
+    attr_accessor :type, :through, :prefix, :field_name, :relation_metadata, :options
 
     def initialize(attributes = {})
       attributes.each do |key, value|
@@ -9,7 +9,7 @@ module SearchMagic
     end
   
     def name
-      @name ||= [options[:skip_prefix].presence ? nil : (prefix.present? ? options[:as] || prefix : nil), 
+      @name ||= [options[:skip_prefix].presence ? nil : (prefix.present? ? (options[:as] || prefix) : nil), 
                 prefix.present? ? field_name : (options[:as] || field_name)].compact.join("_").to_sym
     end
   
