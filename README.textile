@@ -4,7 +4,7 @@ SearchMagic provides full-text search capabilities to "mongoid":http://github.co
 
 h2. Installation
 
-SearchMagic is built on top of the latest pre-release version of mongoid; in all likelihood, it will only work with versions greater than or equal to _2.0.0.rc.7_. The project can be installed as a gem on a target system:
+SearchMagic is built on top of the latest pre-release version of mongoid; in all likelihood, it will only work with versions greater than or equal to _2.0.0.rc.8_. The project can be installed as a gem on a target system:
 
 bc. gem install search_magic
 
