@@ -21,6 +21,18 @@ describe SearchMagic::FullTextSearch do
     its(:inverse_searchables) { should include(:person) }
   end
   
+  context "when included in a document which searches on another, but is not searched on by another" do
+    subject { Part }
+    it { should respond_to(:inverse_searchables) }
+    its(:inverse_searchables) { should be_a(Array) }
+    its(:inverse_searchables) { should be_blank }
+  end
+  
+  context "when included in a document which references a non-searchable document" do
+    subject { IsSearchable }
+    it { expect { subject.inverse_searchables }.to_not raise_error }
+  end
+  
   context "when included in a document with referenced searchables" do
     subject { PartNumber }
     it { should respond_to(:inverse_searchables) }

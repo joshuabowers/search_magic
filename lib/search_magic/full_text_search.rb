@@ -23,8 +23,9 @@ module SearchMagic
       
       def inverse_searchables
         @inverse_searchables ||= relations.values.
-          select {|metadata| metadata.class_name.constantize.searchable_fields.keys.include?(metadata.inverse_setter.chomp("=").to_sym)}.
-          map(&:name)
+          map {|metadata| [metadata, metadata.class_name.constantize] }.
+          select {|metadata, klass| klass < SearchMagic::FullTextSearch && klass.searchable_fields.keys.include?(metadata.inverse_setter.chomp("=").to_sym)}.
+          map(&:first).map(&:name)
       end
       
       def search_for(pattern)
