@@ -9,9 +9,7 @@ module SearchMagic
     end
   
     def name
-      @name ||= through.map do |term, opts| 
-        opts[:skip_prefix].presence ? nil : (opts[:as] || term.to_s.pluralize.singularize)
-      end.compact.join("_").to_sym
+      @name ||= through.map(&:term).compact.join("_").to_sym
     end
   
     def value_for(obj, keep_punctuation)
@@ -32,7 +30,7 @@ module SearchMagic
     private
     
     def get_value(obj)
-      self.through.map(&:first).inject(obj) {|memo, method| memo.is_a?(Array) ? memo.map{|o| o.send(method)} : memo.send(method)}
+      self.through.map(&:field_name).inject(obj) {|memo, method| memo.is_a?(Array) ? memo.map{|o| o.send(method)} : memo.send(method)}
     end
   end
 end

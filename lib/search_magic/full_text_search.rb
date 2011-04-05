@@ -51,23 +51,18 @@ module SearchMagic
       private 
       
       def create_searchables
-        stack, visited, fields = [[self, []]], {}, []
+        stack, visited, fields = [StackFrame.new(self)], {}, []
         until stack.empty?
           current = stack.shift
-          unless visited.has_key?(current.first)
-            visited[current.first] = true
-            current_options = current.second.try(:last).try(:second)
-            if current_options.present?
-              current_options[:except] = Array.wrap(current_options[:except]).compact
-              current_options[:only] = Array.wrap(current_options[:only]).compact
-            end
-            current.first.searchable_fields.each do |field_name, options|
-              next if current_options[:except].try(:include?, field_name) || (current_options[:only].present? && !current_options[:only].try(:include?, field_name)) unless current_options.nil?
-              path = current.second.clone + [[field_name, options]]
-              if association = current.first.reflect_on_association(field_name)
-                stack << [association.class_name.constantize, path]
+          unless visited.has_key?(current.type)
+            visited[current.type] = true
+            current.type.searchable_fields.each do |field_name, options|
+              next unless current.wants_field?(field_name)
+              path = current.path.clone + [Breadcrumb.new(field_name, options)]
+              if association = current.type.reflect_on_association(field_name)
+                stack << StackFrame.new(association.class_name.constantize, path)
               else
-                fields << Metadata.new(:origin_type => current.first, :through => path, :options => options)
+                fields << Metadata.new(:origin_type => current.type, :through => path, :options => options)
               end
             end
           end
