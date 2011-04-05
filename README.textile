@@ -86,7 +86,27 @@ end
 
 p. Now all entries within *:searchable_values* for *:tags* will retain meaningful punctuation. The previous example is interesting for another reason: embedded arrays are handled specially. Specifically, the selector for an embedded array will be singularized. In the case of the previous example, this would result in a selector of "tag".
 
-Finally, it should be noted that nesting of searchable documents is possible. (Currently, cyclic searches, where, for documents A and B, A searching on B which also searches on A should be avoided. Doing so is not prohibited, but will likely cause the environment to crash.) If a given document searches on an association with another document which, in and of itself, searches on a third document, the first automatically has access to the third document's searchable fields.
+Two documents may search on each other's fields; doing so will cause each document to only search upon those fields stemming from itself once. Given the following example, _Foo_ would be able to search on @[:name, :bar_value]@, while _Bar_ would be able to search on @[:value, :foo_name]@.
+
+bc.. class Foo
+  include Mongoid::Document
+  include SearchMagic::FullTextSearch
+  field :name
+  references_many :bars
+  search_on :name
+  search_on :bars
+end
+
+class Bar
+  include Mongoid::Document
+  include SearchMagic::FullTextSearch
+  field :value
+  referenced_in :foo
+  search_on :value
+  search_on :foo
+end
+
+Finally, it should be noted that nesting of searchable documents is possible. If a given document searches on an association with another document which, in and of itself, searches on a third document, the first automatically has access to the third document's searchable fields.
 
 bc.. class Part
   include Mongoid::Document
@@ -119,7 +139,7 @@ class PartCategory
   search_on :name
 end
 
-p. *PartNumber* will be able to search on both _:number_ and _:category_name_. *Part*, on the other hand, will absorb all of the searchable fields of PartNumber, including its associations. So, it can be searched on _:serial_, _:number_, and _:category_name_
+p. *PartNumber* will be able to search on both _:number_ and _:category_name_. *Part*, on the other hand, will absorb all of the searchable fields of PartNumber, including its associations. So, it can be searched on _:serial_, _:number_, and _:category_name_.
 
 h3. :search_for
 
