@@ -1,7 +1,7 @@
 module SearchMagic
   class Metadata
-    attr_accessor :type, :through, :prefix, :field_name, :relation_metadata, :options
-
+    attr_accessor :origin_type, :through, :options
+    
     def initialize(attributes = {})
       attributes.each do |key, value|
         send(:"#{key}=", value)
@@ -9,23 +9,30 @@ module SearchMagic
     end
   
     def name
-      @name ||= [options[:skip_prefix].presence ? nil : (prefix.present? ? (options[:as] || prefix) : nil), 
-                prefix.present? ? field_name : (options[:as] || field_name)].compact.join("_").to_sym
+      @name ||= through.map do |term, opts| 
+        opts[:skip_prefix].presence ? nil : (opts[:as] || term.to_s.pluralize.singularize)
+      end.compact.join("_").to_sym
     end
   
     def value_for(obj, keep_punctuation)
-      v = self.through.call(obj)
+      v = get_value(obj)
       v = v.is_a?(Array) ? v.join(" ") : v.to_s
       v = v.gsub(/[[:punct:]]/, ' ') unless keep_punctuation
       v
     end
     
     def arrangeable_value_for(obj)
-      self.through.call(obj)
+      get_value(obj)
     end
   
     def searchable_value_for(obj)
       value_for(obj, options[:keep_punctuation]).downcase.split.map {|word| [name, word].join(":")}
+    end
+    
+    private
+    
+    def get_value(obj)
+      self.through.map(&:first).inject(obj) {|memo, method| memo.is_a?(Array) ? memo.map{|o| o.send(method)} : memo.send(method)}
     end
   end
 end

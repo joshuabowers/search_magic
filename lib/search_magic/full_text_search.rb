@@ -51,25 +51,29 @@ module SearchMagic
       private 
       
       def create_searchables
-        fields = searchable_fields.map do |field_name, options|
-          if association = reflect_on_association(field_name)
-            options[:as] ||= nil
-            only = [options[:only]].flatten.compact
-            except = [:_D_E_A_D_B_3_3_F_, options[:except]].flatten.compact
-            associated = association.class_name.constantize.searchables
-            wanted = associated.keys.grep(/^(?!.*?(#{except.join("|")})).*/).grep(/^#{only.join("|")}/)
-            associated.select {|key, value| wanted.include?(key)}.map do |name, metadata|
-              Metadata.new(:type => self, :through => lambda do |obj|
-                value = obj.send(field_name)
-                value.is_a?(Array) ? value.map {|item| metadata.through.call(item)} : metadata.through.call(value)
-              end, :prefix => field_name.to_s.singularize.to_sym, :field_name => name, :relation_metadata => association, :options => metadata.options.merge(options))
+        stack, visited, fields = [[self, []]], {}, []
+        until stack.empty?
+          current = stack.shift
+          unless visited.has_key?(current.first)
+            visited[current.first] = true
+            current_options = current.second.try(:last).try(:second)
+            if current_options.present?
+              current_options[:except] = Array.wrap(current_options[:except]).compact
+              current_options[:only] = Array.wrap(current_options[:only]).compact
             end
-          else
-            Metadata.new(:type => self, :through => lambda {|obj| obj.send(field_name) }, :field_name => field_name.to_s.pluralize.singularize.to_sym, :options => options)
+            current.first.searchable_fields.each do |field_name, options|
+              next if current_options[:except].try(:include?, field_name) || (current_options[:only].present? && !current_options[:only].try(:include?, field_name)) unless current_options.nil?
+              path = current.second.clone + [[field_name, options]]
+              if association = current.first.reflect_on_association(field_name)
+                stack << [association.class_name.constantize, path]
+              else
+                fields << Metadata.new(:origin_type => current.first, :through => path, :options => options)
+              end
+            end
           end
-        end.flatten
+        end
         
-        Hash[*fields.map {|metadata| [metadata.name, metadata]}.flatten]
+        fields.index_by(&:name)
       end
     end
   
