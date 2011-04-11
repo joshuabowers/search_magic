@@ -20,7 +20,7 @@ module SearchMagic
     end
     
     def arrangeable_value_for(obj)
-      get_value(obj)
+      post_process(get_value(obj))
     end
   
     def searchable_value_for(obj)
@@ -31,6 +31,21 @@ module SearchMagic
     
     def get_value(obj)
       self.through.map(&:field_name).inject(obj) {|memo, method| memo.is_a?(Array) ? memo.map{|o| o.send(method)} : memo.send(method)}
+    end
+    
+    def post_process(value)
+      value.is_a?(Array) ? value.map {|obj| convert_date_to_time(obj)} : convert_date_to_time(value)
+    end
+    
+    def convert_date_to_time(value)
+      case value.class.name
+      when "Date"
+        value.to_time
+      when "DateTime"
+        value.utc.to_time.localtime
+      else
+        value
+      end
     end
   end
 end

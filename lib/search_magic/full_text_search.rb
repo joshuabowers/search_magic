@@ -87,7 +87,7 @@ module SearchMagic
     def update_associated_documents
       self.class.inverse_searchables.each do |relation_name|
         relation = send(relation_name)
-        (relation.is_a?(Array) ? relation : [relation]).each(&:save!)
+        Array.wrap(relation).each(&:save!)
       end
     end
   end

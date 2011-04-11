@@ -29,6 +29,20 @@ describe SearchMagic::FullTextSearch do
     its("arrangeable_values.keys") { should_not include(:uuid) }
   end
   
+  context "when saving a model with custom method arrangeables which yeild dates" do
+    subject { CustomMethodSearchable.new }
+    its("class.searchables.keys") { should_not be_empty }
+    its("class.searchables.keys") { should include(:random_value, :date_value)}
+    it { expect { subject.save }.not_to raise_error }
+  end
+  
+  context "when saving a model with custom method arrangeables" do
+    subject { CustomMethodSearchable.new }
+    before(:each) { subject.save }
+    its(:arrangeable_values) { should_not be_empty }
+    its("arrangeable_values.keys") { should include(:random_value, :date_value)}
+  end
+  
   context "when :arrange is performed on a model with :searchables" do
     before(:each) do
       Asset.create(:title => "Foo Bar: The Bazzening", :description => "Sequel to last years hit summer blockbuster.", :tags => ["movies", "suspense", "foo.bar", "the-bazzening"])
