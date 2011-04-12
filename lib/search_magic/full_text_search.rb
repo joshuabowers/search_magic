@@ -29,7 +29,7 @@ module SearchMagic
       end
       
       def search_for(pattern)
-        rval = /("[^"]+"|\S+)/
+        rval = /("[^"]+"|'[^']+'|\S+)/
         rsearch = /(?:(#{searchables.keys.join('|')}):#{rval})|#{rval}/i
         unless pattern.blank?
           terms = pattern.scan(rsearch).map(&:compact).map do |term|
