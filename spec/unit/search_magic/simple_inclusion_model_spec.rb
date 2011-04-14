@@ -1,3 +1,5 @@
+require 'spec_helper'
+
 describe SearchMagic do
   context "when included in a model" do
     subject { SimpleInclusionModel }

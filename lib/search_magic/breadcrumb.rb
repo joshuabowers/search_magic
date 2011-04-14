@@ -10,7 +10,7 @@ module SearchMagic
     end
     
     def term
-      @term ||= options[:skip_prefix].presence ? nil : (options[:as] || field_name.to_s.pluralize.singularize)
+      @term ||= options[:skip_prefix].presence ? nil : (options[:as] || field_name.to_s.pluralize.singularize).to_sym
     end
     
     def clone
