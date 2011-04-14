@@ -4,7 +4,7 @@ SearchMagic provides full-text search capabilities to "mongoid":http://github.co
 
 h2. Installation
 
-SearchMagic is built on top of the latest pre-release version of mongoid; in all likelihood, it will only work with versions greater than or equal to _2.0.0.rc.8_. The project can be installed as a gem on a target system:
+SearchMagic is built on top of mongoid; in all likelihood, it will only work with versions greater than or equal to _2.0.0_. The project can be installed as a gem on a target system:
 
 bc. gem install search_magic
 
@@ -20,7 +20,7 @@ Adding FullTextSearch is as simple as including the appropriate module into a mo
 
 bc.. class Address
   include Mongoid::Document
-  include SearchMagic::FullTextSearch
+  include SearchMagic
   field :street
   field :city
   field :state
@@ -51,7 +51,7 @@ The example in the previous section showcased using :search_on on basic *Mongoid
 
 bc.. class Person
   include Mongoid::Document
-  include SearchMagic::FullTextSearch
+  include SearchMagic
   field :name
   embeds_one :address
   
@@ -78,7 +78,7 @@ Values added to *:searchable_values* automatically are split on whitespace and h
 
 bc.. class Asset
   include Mongoid::Document
-  include SearchMagic::FullTextSearch
+  include SearchMagic
   field :tags, :type => Array
   
   search_on :tags, :keep_punctuation => true
@@ -90,7 +90,7 @@ Two documents may search on each other's fields; doing so will cause each docume
 
 bc.. class Foo
   include Mongoid::Document
-  include SearchMagic::FullTextSearch
+  include SearchMagic
   field :name
   references_many :bars
   search_on :name
@@ -99,7 +99,7 @@ end
 
 class Bar
   include Mongoid::Document
-  include SearchMagic::FullTextSearch
+  include SearchMagic
   field :value
   referenced_in :foo
   search_on :value
@@ -111,7 +111,7 @@ Finally, it should be noted that nesting of searchable documents is possible. If
 bc.. class Part
   include Mongoid::Document
   include Mongoid::Timestamps
-  include SearchMagic::FullTextSearch
+  include SearchMagic
   field :serial
   references_in :part_number
   
@@ -121,7 +121,7 @@ end
 
 class PartNumber
   include Mongoid::Document
-  include SearchMagic::FullTextSearch
+  include SearchMagic
   field :value
   references_many :parts
   referenced_in :part_category
@@ -132,7 +132,7 @@ end
 
 class PartCategory
   include Mongoid::Document
-  include SearchMagic::FullTextSearch
+  include SearchMagic
   field :name
   references_many :part_numbers
   
