@@ -37,7 +37,7 @@ describe SearchMagic::FullTextSearch do
   end
   
   context "when a model is saved, its :searchable_values update" do
-    subject { Asset.new(:title => "Foo Bar: The Bazzening", :description => "Sequel to last years hit summer blockbuster.", :tags => ["movies", "foo.bar", "the-bazzening"], :uuid => "ae9d14ee-be93-11df-9fec-78ca39fffe11")}
+    subject { Fabricate.build(:asset, :title => "Foo Bar: The Bazzening", :description => "Sequel to last years hit summer blockbuster.", :tags => ["movies", "foo.bar", "the-bazzening"]) }
     before(:each) { subject.save }
     its(:searchable_values) { should_not be_empty }
     its(:searchable_values) { should include("title:foo", "title:bar", "title:the", "title:bazzening")}
@@ -45,7 +45,7 @@ describe SearchMagic::FullTextSearch do
     its(:searchable_values) { should_not include("uuid:ae9d14ee-be93-11df-9fec-78ca39fffe11", "uuid:ae9d14ee")}
     its(:searchable_values) { should include("tag:movies", "tag:foo.bar", "tag:the-bazzening")}
   end
-  
+    
   context "when :search is performed on a model without :searchables" do
     subject { NoSearchables.search_for("foo") }
     it { should be_a(Mongoid::Criteria) }

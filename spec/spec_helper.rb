@@ -3,6 +3,7 @@ require 'bundler/setup'
 
 require 'mongoid'
 require 'search_magic'
+require 'fabrication'
 
 MODELS = File.join(File.dirname(__FILE__), "models")
 
