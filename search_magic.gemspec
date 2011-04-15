@@ -17,6 +17,7 @@ Gem::Specification.new do |s|
   s.add_development_dependency("database_cleaner")
   s.add_development_dependency("bson_ext")
   s.add_development_dependency("fabrication")
+  s.add_development_dependency("chronic")
 
   s.rubyforge_project = "search_magic"
 

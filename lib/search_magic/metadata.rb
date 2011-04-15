@@ -1,6 +1,6 @@
 module SearchMagic
   class Metadata
-    attr_accessor :origin_type, :through, :options
+    attr_accessor :type, :through, :options
     
     def initialize(attributes = {})
       attributes.each do |key, value|
@@ -10,6 +10,14 @@ module SearchMagic
   
     def name
       @name ||= through.map(&:term).compact.join("_").to_sym
+    end
+    
+    def comparable?
+      @comparable ||= self.type.public_instance_methods.include? :<
+    end
+    
+    def datable?
+      @datable ||= [Date, DateTime, Time].include? self.type
     end
   
     def value_for(obj, keep_punctuation)

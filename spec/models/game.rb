@@ -1,7 +1,7 @@
 class Game
   include Mongoid::Document
   include SearchMagic::FullTextSearch
-  field :title
+  field :title, :type => String
   field :price, :type => Float
   field :high_score, :type => Integer
   field :released_on, :type => Date

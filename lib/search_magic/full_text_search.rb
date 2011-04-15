@@ -33,8 +33,12 @@ module SearchMagic
         rsearch = /(?:(#{searchables.keys.join('|')}):#{rval})|#{rval}/i
         unless pattern.blank?
           terms = pattern.scan(rsearch).map(&:compact).map do |term|
-            term.last.scan(/\b(\S+)\b/).flatten.map do |word|
-              /#{term.length > 1 ? Regexp.escape(term.first) : '[^:]+'}:.*#{Regexp.escape(word)}/i
+            selector = term.length > 1 ? Regexp.escape(term.first) : '[^:]+'
+            metadata = searchables[term.first.to_sym] if term.length > 1
+            parsed_date = Chronic.parse(term.last) if metadata && metadata.datable?
+            fragment = /#{selector}:#{parsed_date}/i if parsed_date
+            fragment || term.last.scan(/\b(\S+)\b/).flatten.map do |word|
+              /#{selector}:.*#{Regexp.escape(word)}/i
             end
           end.flatten
           all_in(:searchable_values => terms)
@@ -62,7 +66,7 @@ module SearchMagic
               if association = current.type.reflect_on_association(field_name)
                 stack << StackFrame.new(association.class_name.constantize, path)
               else
-                fields << Metadata.new(:origin_type => current.type, :through => path, :options => options)
+                fields << Metadata.new(:type => current.type.fields[field_name.to_s].try(:type) || Object, :through => path, :options => options)
               end
             end
           end
