@@ -1,7 +1,7 @@
 describe SearchMagic do
   context "when included in a model which defines field types" do
     subject { ModelWithFieldTypes.searchables }
-    it { subject[:generic_field].type.should == Object }
+    it { subject[:generic_field].type.should == Mongoid::Fields::Serializable::Object }
     it { subject[:generic_field].comparable?.should be_false }
     it { subject[:string_field].type.should == String }
     it { subject[:string_field].comparable?.should be_true }
