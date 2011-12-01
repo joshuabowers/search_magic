@@ -123,7 +123,7 @@ on this option will cause all searchables coming from the association to lack th
 prefix, as in the following example.
 
 ```ruby
-search_on :address, skip_prefix: true # results in :street, :city, ...
+search_on :address, :skip_prefix => true # results in :street, :city, ...
 ```
 
 :skip_prefix and :as cannot be used concurrently: :skip_prefix will
@@ -140,9 +140,9 @@ that can easily be done through the **:keep_punctuation** option:
 class Asset
   include Mongoid::Document
   include SearchMagic
-  field :tags, type: Array
+  field :tags, :type => Array
 
-  search_on :tags, keep_punctuation: true
+  search_on :tags, :keep_punctuation => true
 end
 ```
 
@@ -242,47 +242,47 @@ be searched on ***:serial***, ***:number***, and ***:category_name***.
 ### :search_for
 
 Searching a model with SearchMagic is simple: each model gains a class
-method called *\*:search*for\*\_ which accepts one parameter, the search
-pattern. This method is a [mongoid
-scope](http://mongoid.org/docs/querying/scopes.html); it will always return a
-criteria object after executing. As such, it plays nicely with other
-scopes on your models.
+method called ***:search_for*** which accepts one parameter, the search
+pattern. This method is a [mongoid scope](http://mongoid.org/docs/querying/scopes.html); 
+it will always return a [criteria](http://mongoid.org/docs/querying/criteria.html) object
+after executing. As such, it plays nicely with other scopes on your models.
 
 SearchMagic expects the incoming *pattern* to be a string containing
 whitespace delimited phrases. Each phrase can either be a single word,
 or a *selector:value* pair. Multiple phrases will narrow the search
 field: each additional phrase places an additional requirement on a
 matching document. Single word phrases are matched across all entries in
-a model’s *:searchable*values\_ array. The pairs, on the other hand,
+a model’s ***:searchable_values*** array. The pairs, on the other hand,
 restrict the search for *value* against only those entries which match
 *selector*. In either case, *word* or *value* may contain fragments of
-whole entries stored within *:searchable*values\_.
+whole entries stored within ***:searchable_values***.
 
 Using the models defined in the previous section, the following searches
 are all perfectly valid:
 
 ```ruby
-Part.search_for("table") # full text search on "table"
-Part.search_for("category_name:table") # restricts the search for "table" to "category_name"
-Part.search_for("bike serial:b1234") # full text search on "bike", with an extra requirement that the serial be "b1234"
+Part.search_for("table")                # full text search on "table"
+Part.search_for("category_name:table")  # restricts the search for "table" to "category_name"
+Part.search_for("bike serial:b1234")    # full text search on "bike", with an extra requirement that the serial be "b1234"
 ```
 
-As *\*:search*for\*\_ is a scope, it can be called on any previous scope
+As ***:search_for*** is a scope, it can be called on any previous scope
 within the call chain:
 
 ```ruby
 Part.where(:created_at.gt => 1.day.ago.time).search_for("table")
 ```
 
-**:search_for** can be called multiple times within the same scope
+***:search_for*** can be called multiple times within the same scope
 chain. Doing so will append each successive pattern to the previous
 searches. Effectively, this is the same as performing a single
-**:search_for** with whitespace delimited terms in the pattern. To
-make such expressions slightly more readable, **:search_for** is
-aliased as **:and_for**:
+***:search_for*** with whitespace delimited terms in the pattern. To
+make such expressions slightly more readable, ***:search_for*** is
+aliased as ***:and_for***:
 
 ```ruby
-Part.search_for("bike").and_for("serial:b1234")
+Part.search_for("bike").and_for("serial:b1234") # is functionally equivalent to...
+Part.search_for("bike serial:b1234")
 ```
 
 ### :arrange
@@ -294,8 +294,8 @@ parameter specifying the sort direction. (If the second parameter is
 omitted, it will default to ascending.)
 
 ```ruby
-Part.arrange(:serial)
-Part.arrange(:serial, :asc) # same as last example
+Part.arrange(:serial)               # arrange parts by their serial
+Part.arrange(:serial, :asc)         # same as last example
 Part.arrange(:category_name, :desc) # arrange the parts in descending order by :category_name
 ```
 
