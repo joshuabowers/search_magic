@@ -34,24 +34,24 @@ In the following example, the **SearchMagic::FullTextSearch** module is
 included and each field of the model is made searchable.
 
 ```ruby
-class Address\
- include Mongoid::Document\
- include SearchMagic\
- field :street\
- field :city\
- field :state\
- field :post*code\
- embedded*in :person
+class Address
+ include Mongoid::Document
+ include SearchMagic
+ field :street
+ field :city
+ field :state
+ field :post_code
+ embedded_in :person
 
-search*on :street\
- search*on :city\
- search*on :state\
- search*on :post\_code\
+ search_on :street
+ search_on :city
+ search_on :state
+ search_on :post_code
 end
 ```
 
 At this point, **Address** can be searched by calling its
-*\*:search*for\*\_ method:
+***:search_for*** method:
 
 ```ruby
 Address.search_for("state:ca")
@@ -64,7 +64,7 @@ searchable through the ***:arrange*** method:
 Address.arrange(:state, :asc)
 ```
 
-### :search\_on
+### :search_on
 
 Fields that are made searchable by :search*on have their values cached
 in an embedded array within each document. This array,
@@ -82,14 +82,14 @@ The example in the previous section showcased using :search\_on on basic
 a document which denote an association.
 
 ```ruby
-class Person\
- include Mongoid::Document\
- include SearchMagic\
- field :name\
- embeds\_one :address
+class Person
+ include Mongoid::Document
+ include SearchMagic
+ field :name
+ embeds_one :address
 
- search*on :name\
- search*on :address\
+ search_on :name
+ search_on :address
 end
 ```
 
@@ -103,8 +103,10 @@ introduced from an association can be restricted by use of the **:only**
 and **:except** options, which may either take an array or an individual
 field name:
 
-    search_on :address, :only => [:street, :state]
-    search_on :address, :except => :post_code
+```ruby
+search_on :address, :only => [:street, :state]
+search_on :address, :except => :post_code
+```
 
 By default, an association’s fields will be prefixed by name of the
 association. Therefore, the previous example would add entries to
@@ -112,29 +114,35 @@ association. Therefore, the previous example would add entries to
 `[:address_street, :address_city, :address_state, :address_post_code]`.
 The **:as** option alters the prefix:
 
-    search_on :address, :as => :location # results in :location_street, :location_city, ...
+```ruby
+search_on :address, :as => :location # results in :location_street, :location_city, ...
+```
 
 It is also possible to prevent the prefix from being added to each
 absorbed searchable field through use of the **:skip\_prefix** option:
 
-    search_on :address, :skip_prefix => true # results in :street, :city, ...
+```ruby
+search_on :address, :skip_prefix => true # results in :street, :city, ...
+```
 
-:skip*prefix and :as cannot be used concurrently: :skip*prefix will
+:skip_prefix and :as cannot be used concurrently: :skip_prefix will
 always take precedence.
 
-Values added to **:searchable\_values** automatically are split on
+Values added to **:searchable_values** automatically are split on
 whitespace and have their punctuation removed. For most cases, searches
 performed on models are not going to need punctuation support. However,
 if it is desired to keep the punctuation present on a particular field,
-that can easily be done through the **:keep\_punctuation** option:
+that can easily be done through the **:keep_punctuation** option:
 
-bc.. class Asset\
- include Mongoid::Document\
- include SearchMagic\
- field :tags, :type =\> Array
+```ruby
+class Asset
+  include Mongoid::Document
+  include SearchMagic
+  field :tags, :type =\> Array
 
-search*on :tags, :keep*punctuation =\> true\
+  search_on :tags, :keep*punctuation =\> true
 end
+```
 
 Now all entries within **:searchable\_values** for **:tags** will retain
 meaningful punctuation. The previous example is interesting for another
@@ -148,23 +156,25 @@ once. Given the following example, *Foo* would be able to search on
 `[:name, :bar_value]`, while *Bar* would be able to search on
 `[:value, :foo_name]`.
 
-bc.. class Foo\
- include Mongoid::Document\
- include SearchMagic\
- field :name\
- references*many :bars\
- search*on :name\
- search\_on :bars\
+```ruby
+class Foo
+  include Mongoid::Document
+  include SearchMagic
+  field :name
+  references_many :bars
+  search_on :name
+  search_on :bars
 end
 
-class Bar\
- include Mongoid::Document\
- include SearchMagic\
- field :value\
- referenced*in :foo\
- search*on :value\
- search\_on :foo\
+class Bar
+  include Mongoid::Document
+  include SearchMagic
+  field :value
+  referenced_in :foo
+  search_on :value
+  search_on :foo
 end
+```
 
 Finally, it should be noted that nesting of searchable documents is
 possible. If a given document searches on an association with another
@@ -172,36 +182,38 @@ document which, in and of itself, searches on a third document, the
 first automatically has access to the third document’s searchable
 fields.
 
-bc.. class Part\
- include Mongoid::Document\
- include Mongoid::Timestamps\
- include SearchMagic\
- field :serial\
- references*in :part*number
+```ruby
+class Part
+  include Mongoid::Document
+  include Mongoid::Timestamps
+  include SearchMagic
+  field :serial
+  references_in :part_number
 
-search*on :serial\
- search*on :part*number, :skip*prefix =\> true\
+  search_on :serial
+  search_on :part_number, :skip_prefix =\> true
 end
 
-class PartNumber\
- include Mongoid::Document\
- include SearchMagic\
- field :value\
- references*many :parts\
- referenced*in :part\_category
+class PartNumber
+  include Mongoid::Document
+  include SearchMagic
+  field :value
+  references_many :parts
+  referenced_in :part_category
 
-search*on :number\
- search*on :part\_category, :as =\> :category\
+  search_on :number
+  search_on :part_category, :as =\> :category
 end
 
-class PartCategory\
- include Mongoid::Document\
- include SearchMagic\
- field :name\
- references*many :part*numbers
+class PartCategory
+  include Mongoid::Document
+  include SearchMagic
+  field :name
+  references_many :part_numbers
 
-search\_on :name\
+  search_on :name
 end
+```
 
 **PartNumber** will be able to search on both *:number* and
 *:category*name*. **Part**, on the other hand, will absorb all of the
