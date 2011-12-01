@@ -138,13 +138,13 @@ that can easily be done through the **:keep_punctuation** option:
 class Asset
   include Mongoid::Document
   include SearchMagic
-  field :tags, :type =\> Array
+  field :tags, :type => Array
 
-  search_on :tags, :keep*punctuation =\> true
+  search_on :tags, :keep_punctuation => true
 end
 ```
 
-Now all entries within **:searchable\_values** for **:tags** will retain
+Now all entries within **:searchable_values** for **:tags** will retain
 meaningful punctuation. The previous example is interesting for another
 reason: embedded arrays are handled specially. Specifically, the
 selector for an embedded array will be singularized. In the case of the
@@ -191,7 +191,7 @@ class Part
   references_in :part_number
 
   search_on :serial
-  search_on :part_number, :skip_prefix =\> true
+  search_on :part_number, :skip_prefix => true
 end
 
 class PartNumber
@@ -202,7 +202,7 @@ class PartNumber
   referenced_in :part_category
 
   search_on :number
-  search_on :part_category, :as =\> :category
+  search_on :part_category, :as => :category
 end
 
 class PartCategory
@@ -216,11 +216,11 @@ end
 ```
 
 **PartNumber** will be able to search on both *:number* and
-*:category*name*. **Part**, on the other hand, will absorb all of the
+*:category_name*. **Part**, on the other hand, will absorb all of the
 searchable fields of PartNumber, including its associations. So, it can
-be searched on*:serial*,*:number*, and*:category*name*.
+be searched on *:serial*, *:number*, and *:category_name*.
 
-### :search\_for
+### :search_for
 
 Searching a model with SearchMagic is simple: each model gains a class
 method called *\*:search*for\*\_ which accepts one parameter, the search
@@ -242,23 +242,29 @@ whole entries stored within *:searchable*values\_.
 Using the models defined in the previous section, the following searches
 are all perfectly valid:
 
-    Part.search_for("table") # full text search on "table"
-    Part.search_for("category_name:table") # restricts the search for "table" to "category_name"
-    Part.search_for("bike serial:b1234") # full text search on "bike", with an extra requirement that the serial be "b1234"
+```ruby
+Part.search_for("table") # full text search on "table"
+Part.search_for("category_name:table") # restricts the search for "table" to "category_name"
+Part.search_for("bike serial:b1234") # full text search on "bike", with an extra requirement that the serial be "b1234"
+```
 
 As *\*:search*for\*\_ is a scope, it can be called on any previous scope
 within the call chain:
 
-    Part.where(:created_at.gt => 1.day.ago.time).search_for("table")
+```ruby
+Part.where(:created_at.gt => 1.day.ago.time).search_for("table")
+```
 
-*\*:search*for\*\_ can be called multiple times within the same scope
+**:search_for** can be called multiple times within the same scope
 chain. Doing so will append each successive pattern to the previous
 searches. Effectively, this is the same as performing a single
-***:search*for**\_ with whitespace delimited terms in the pattern. To
-make such expressions slightly more readable, *\*:search*for*** is
-aliased as *\*:and*for***:
+**:search_for** with whitespace delimited terms in the pattern. To
+make such expressions slightly more readable, **:search_for** is
+aliased as **:and_for**:
 
-    Part.search_for("bike").and_for("serial:b1234")
+```ruby
+Part.search_for("bike").and_for("serial:b1234")
+```
 
 ### :arrange
 
@@ -268,14 +274,18 @@ required parameter specifying the searchable to sort on and one optional
 parameter specifying the sort direction. (If the second parameter is
 omitted, it will default to ascending.)
 
-    Part.arrange(:serial)
-    Part.arrange(:serial, :asc) # same as last example
-    Part.arrange(:category_name, :desc) # arrange the parts in descending order by :category_name
+```ruby
+Part.arrange(:serial)
+Part.arrange(:serial, :asc) # same as last example
+Part.arrange(:category_name, :desc) # arrange the parts in descending order by :category_name
+```
 
 As mentioned, ***:arrange*** is a scope, so it can be chained with other
 scopes on a given model:
 
-    Part.search_for("category_name:table").arrange(:serial, :asc)
+```ruby
+Part.search_for("category_name:table").arrange(:serial, :asc)
+```
 
 ## Problems? Comments?
 
