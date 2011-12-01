@@ -130,4 +130,27 @@ describe SearchMagic::FullTextSearch do
       it { should include("Undercover Foo", "Foo Bar: The Bazzening") }
     end
   end
+  
+  context "when working with a model with :skip_prefix on a field" do
+    subject { FieldSkipPrefix }
+    its('searchable_fields.keys') { should include(:name) }
+    its('searchables.keys') { should include(:"") }
+  end
+  
+  context "when searching for a model with :skip_prefix on a field" do
+    before(:each) do
+      5.times { Fabricate(:field_skip_prefix) }
+      Fabricate(:field_skip_prefix, :name => "Dirigible")
+    end
+    
+    context "searching on that field should return nothing" do
+      subject { FieldSkipPrefix.search_for("name:test") }
+      its(:count) { should == 0 }
+    end
+    
+    context "performing a full text search should return instances" do
+      subject { FieldSkipPrefix.search_for("test") }
+      its(:count) { should == 5 }
+    end
+  end
 end

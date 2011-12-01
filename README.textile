@@ -106,7 +106,7 @@ class Bar
   search_on :foo
 end
 
-Finally, it should be noted that nesting of searchable documents is possible. If a given document searches on an association with another document which, in and of itself, searches on a third document, the first automatically has access to the third document's searchable fields.
+p. Finally, it should be noted that nesting of searchable documents is possible. If a given document searches on an association with another document which, in and of itself, searches on a third document, the first automatically has access to the third document's searchable fields.
 
 bc.. class Part
   include Mongoid::Document

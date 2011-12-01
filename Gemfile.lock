@@ -2,6 +2,7 @@ PATH
   remote: .
   specs:
     search_magic (0.2.0)
+      chronic
       mongoid (>= 2.0.0)
 
 GEM
@@ -43,7 +44,6 @@ PLATFORMS
 
 DEPENDENCIES
   bson_ext
-  chronic
   database_cleaner
   fabrication
   rspec
