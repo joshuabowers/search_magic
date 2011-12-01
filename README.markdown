@@ -26,24 +26,22 @@ gem 'search_magic'
 
 ## Getting Started
 
-### Adding FullTextSearch capabilities
+### Adding full text search capabilities
 
-Adding FullTextSearch is as simple as including the appropriate module
-into a mongoid document and defining which fields are to be searchable.
-In the following example, the **SearchMagic::FullTextSearch** module is
-included and each field of the model is made searchable.
+Adding full text search is as simple as including the **SearchMagic** module
+into a mongoid document and defining which fields are to be searchable:
 
 ```ruby
 class Address
  include Mongoid::Document
- include SearchMagic
+ include SearchMagic        # <- This is where the magic begins!
  field :street
  field :city
  field :state
  field :post_code
  embedded_in :person
 
- search_on :street
+ search_on :street          # <- And then define which fields you want to search by...
  search_on :city
  search_on :state
  search_on :post_code
@@ -225,7 +223,7 @@ be searched on *:serial*, *:number*, and *:category_name*.
 Searching a model with SearchMagic is simple: each model gains a class
 method called *\*:search*for\*\_ which accepts one parameter, the search
 pattern. This method is a [mongoid
-scope](http://mongoid.org/docs/querying/); it will always return a
+scope](http://mongoid.org/docs/querying/scopes.html); it will always return a
 criteria object after executing. As such, it plays nicely with other
 scopes on your models.
 
