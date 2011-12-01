@@ -32,7 +32,7 @@ module SearchMagic
     end
   
     def searchable_value_for(obj)
-      value_for(obj, options[:keep_punctuation]).downcase.split.map {|word| [name, word].join(":")}
+      value_for(obj, options[:keep_punctuation]).downcase.split.map {|word| [name, word].join(SearchMagic.config.selector_value_separator || ':')}
     end
     
     private

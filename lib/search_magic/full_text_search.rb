@@ -29,16 +29,17 @@ module SearchMagic
       end
       
       def search_for(pattern)
+        separator = Regexp.escape(SearchMagic.config.selector_value_separator || ':')
         rval = /("[^"]+"|'[^']+'|\S+)/
-        rsearch = /(?:(#{searchables.keys.join('|')}):#{rval})|#{rval}/i
+        rsearch = /(?:(#{searchables.keys.join('|')})#{separator}#{rval})|#{rval}/i
         unless pattern.blank?
           terms = pattern.scan(rsearch).map(&:compact).map do |term|
-            selector = term.length > 1 ? Regexp.escape(term.first) : '[^:]+'
+            selector = term.length > 1 ? Regexp.escape(term.first) : "[^#{separator}]+"
             metadata = searchables[term.first.to_sym] if term.length > 1
             parsed_date = Chronic.parse(term.last) if metadata && metadata.datable?
-            fragment = /#{selector}:#{parsed_date}/i if parsed_date
+            fragment = /#{selector}#{separator}#{parsed_date}/i if parsed_date
             fragment || term.last.scan(/\b(\S+)\b/).flatten.map do |word|
-              /#{selector}:.*#{Regexp.escape(word)}/i
+              /#{selector}#{separator}.*#{Regexp.escape(word)}/i
             end
           end.flatten
           all_in(:searchable_values => terms)
