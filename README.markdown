@@ -64,20 +64,20 @@ Address.arrange(:state, :asc)
 
 ### :search_on
 
-Fields that are made searchable by :search*on have their values cached
+Fields that are made searchable by ***:search_on*** have their values cached
 in an embedded array within each document. This array,
-**:searchable*values**, should contain entries of the
-form**field*name:value**. The selector, \*field*name**, represents a
+***:searchable_values***, should contain entries of the
+form `field_name:instance_value`. The selector, `field_name`, represents a
 filter which can be used when searching to narrow the search space; it
-can be manually renamed by passing the**:as\* option to :search\_on:
+can be manually renamed by passing the **:as** option to ***:search_on***:
 
 ```ruby
 search_on :post_code, :as => :zip_code 
 ```
 
-The example in the previous section showcased using :search\_on on basic
-**Mongoid::Document** fields. It can, however, be used on fields within
-a document which denote an association.
+The example in the previous section showcased using ***:search_on*** on basic
+**Mongoid::Document** fields. It can, however, be used on both embedded and
+referenced documents, as seen in the next example.
 
 ```ruby
 class Person
@@ -89,6 +89,8 @@ class Person
  search_on :name
  search_on :address
 end
+
+Person.search_for("address_state:ca") # Find all people with an address in california
 ```
 
 When an association is searched on, all of its searchable fields are
@@ -96,7 +98,7 @@ automatically made searchable in the first document. In the previous
 example, this means that the four fields of **Address**,
 `[:street, :city, :state, :post_code]` are now searchable from within
 **Person**. As such, each association will end up adding entries into
-the **:searchable\_values** array. The searchable fields which are
+the ***:searchable_values*** array. The searchable fields which are
 introduced from an association can be restricted by use of the **:only**
 and **:except** options, which may either take an array or an individual
 field name:
@@ -108,7 +110,7 @@ search_on :address, :except => :post_code
 
 By default, an association’s fields will be prefixed by name of the
 association. Therefore, the previous example would add entries to
-**:searchable\_values** with the selectors
+***:searchable_values*** with the selectors
 `[:address_street, :address_city, :address_state, :address_post_code]`.
 The **:as** option alters the prefix:
 
@@ -116,17 +118,19 @@ The **:as** option alters the prefix:
 search_on :address, :as => :location # results in :location_street, :location_city, ...
 ```
 
-It is also possible to prevent the prefix from being added to each
-absorbed searchable field through use of the **:skip\_prefix** option:
+Another option, ***:skip_prefix***, can be used to simplify this prefixing process: turning
+on this option will cause all searchables coming from the association to lack that association's
+prefix, as in the following example.
 
 ```ruby
-search_on :address, :skip_prefix => true # results in :street, :city, ...
+search_on :address, skip_prefix: true # results in :street, :city, ...
 ```
 
 :skip_prefix and :as cannot be used concurrently: :skip_prefix will
-always take precedence.
+always take precedence. Note that :skip_prefix should only be used on associations and not on
+regular fields.
 
-Values added to **:searchable_values** automatically are split on
+Values added to ***:searchable_values*** automatically are split on
 whitespace and have their punctuation removed. For most cases, searches
 performed on models are not going to need punctuation support. However,
 if it is desired to keep the punctuation present on a particular field,
@@ -136,22 +140,29 @@ that can easily be done through the **:keep_punctuation** option:
 class Asset
   include Mongoid::Document
   include SearchMagic
-  field :tags, :type => Array
+  field :tags, type: Array
 
-  search_on :tags, :keep_punctuation => true
+  search_on :tags, keep_punctuation: true
 end
 ```
 
-Now all entries within **:searchable_values** for **:tags** will retain
+Now all entries within ***:searchable_values*** for **:tags** will retain
 meaningful punctuation. The previous example is interesting for another
 reason: embedded arrays are handled specially. Specifically, the
 selector for an embedded array will be singularized. In the case of the
 previous example, this would result in a selector of “tag”.
 
+```ruby
+asset = Asset.create(tags: %w{foo b.a.r b'az})
+asset.searchable_values # ["tag:foo", "tag:b.a.r", "tag:b'az"]
+
+Asset.search_for("tag:b.a.r") # notice that the selector for searching is singularized
+```
+
 Two documents may search on each other’s fields; doing so will cause
 each document to only search upon those fields stemming from itself
-once. Given the following example, *Foo* would be able to search on
-`[:name, :bar_value]`, while *Bar* would be able to search on
+once. Given the following example, **Foo** would be able to search on
+`[:name, :bar_value]`, while **Bar** would be able to search on
 `[:value, :foo_name]`.
 
 ```ruby
@@ -172,6 +183,12 @@ class Bar
   search_on :value
   search_on :foo
 end
+
+Foo.searchables.keys # [:name, :bar_value]
+Bar.searchables.keys # [:value, :foo_name]
+
+Foo.search_for("name:foo bar_value:20")
+Bar.search_for("value:20 foo_name:foo")
 ```
 
 Finally, it should be noted that nesting of searchable documents is
@@ -211,12 +228,16 @@ class PartCategory
 
   search_on :name
 end
+
+Part.searchables.keys         # [:serial, :number, :category_name]
+PartNumber.searchables.keys   # [:number, :category_name]
+PartCategory.searchables.keys # [:name] 
 ```
 
-**PartNumber** will be able to search on both *:number* and
-*:category_name*. **Part**, on the other hand, will absorb all of the
+**PartNumber** will be able to search on both ***:number*** and
+***:category_name***. **Part**, on the other hand, will absorb all of the
 searchable fields of PartNumber, including its associations. So, it can
-be searched on *:serial*, *:number*, and *:category_name*.
+be searched on ***:serial***, ***:number***, and ***:category_name***.
 
 ### :search_for
 
