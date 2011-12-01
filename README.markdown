@@ -1,3 +1,27 @@
+Document Structure:
+- Abstract
+- Installation
+- Getting Started
+  - Making a document searchable
+  - Example searches on a searchable document
+  - Querying docs about their searchables
+- Global Configuration
+  - :selector_value_separator
+- Method Details
+  - search_on
+    - :as
+    - :keep_punctuation
+    - search trees
+      - :skip_prefix, :as revisted
+      - :only / :except
+      - cyclic searches
+  - search_for
+    - full text search
+    - selector targeting
+    - natural language date processing via chronic
+  - arrange
+- Closing
+
 # SearchMagic
 
 SearchMagic provides full-text search capabilities to
