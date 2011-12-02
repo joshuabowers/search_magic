@@ -199,15 +199,53 @@ Options currently supported by search_on are:
 1. **as**: specifies a text value to override the default field name behavior; this allows a field to masquerade as something else when its slumming about your interface:
   
     ```ruby
-search_on :postal_code, :as => :zip_code
-```
-2. **keep_punctuation**:
-3. **skip_prefix**:
-4. **only**:
-5. **except**:
+    search_on :postal_code, :as => :zip_code
+    ```
+  
+  In the preceding example, the field specified by **postal_code** will be represented as **zip_code** within **searchable_values**.
+2. **keep_punctuation**: by default, all punctuation for a field is automatically stripped out when values are stored in **searchable_values**; this can be turned off for a particular field by turning on **keep_punctuation**.
 
-#### search trees
-##### cyclic searches
+    ```ruby
+    search_on :postal_code, :keep_punctuation => true # e.g. ["postal_code:12345-6789"]
+    ```
+3. **skip_prefix**: as described in the next section, fields bubbling up the search graph are prefixed with extra information. This prefix is the name of the association as seen by the class defining the search. So, for example:
+
+    ```ruby
+    class Foo
+      #...
+      field :name
+      embeds_many :bars
+      
+      search_on :name
+      search_on :bars
+    end
+    
+    class Bar
+      #...
+      field :name
+      
+      search_on :name
+    end
+    
+    Foo.searchables.keys # [..., :name, :bar_name, ...]
+    ```
+    
+  Which is to say, that **Foo** has a searchable on one of its local fields, and a searchable on a field coming from **Bar**. This second searchable is automatically prefixed with "bar_". This prefix, for only this level of the search graph, can be skipped through use of **skip_prefix**. If the above exampled were modified like so:
+    
+    ```ruby
+    search_on :bars, :skip_prefix => true
+    ```
+    
+  Then anything coming through **bars** will not have any prefix. (This particular example is bad; don't do it! It would result in two searchables with the field name of "name", which defeats the awesome of SearchMagic.) Note that **skip_prefix** takes precedence over **as**; the two cannot be used together in any meaningful sense. Also, this option is really only intended for use on associations; regular fields should not have prefixes skipped.
+4. **only** / **except**: when building its search graph, SearchMagic will automatically include any searchable fields from an associated document into the current document. The fields that are included can be controlled through the **only** and **except** options. Only specifies that only the specified fields are gobbled up; except specifies that everything but the specified fields are included. These two parameters can be used concurrently, although that would be somewhat strange. They both can take either a single field name or an array of field names.
+
+    ```ruby
+    search_on :bars, :only => :name
+    search_on :bars, :except => [:name, ...]
+    ```
+
+### Search Graph
+#### cyclic searches
 ### search_for
 #### natural language date processing via chronic
 ### arrange
