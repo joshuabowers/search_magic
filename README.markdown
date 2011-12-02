@@ -1,21 +1,16 @@
 # SearchMagic
 
-SearchMagic provides full-text search capabilities to [mongoid](http://github.com/mongoid/mongoid) documents, 
-embedded documents, and referenced documents with a clean, consistent, and easy to use syntax. Documents specify
-which data they want to expose as searchable; users can then search for these documents in either a broad or
-in a targeted manner.
+SearchMagic provides full-text search capabilities to [mongoid](http://github.com/mongoid/mongoid) documents, embedded documents, and referenced documents with a clean, consistent, and easy to use syntax. Documents specify which data they want to expose as searchable; users can then search for these documents in either a broad or in a targeted manner.
 
 ## Installation
 
-SearchMagic is built on top of mongoid; in all likelihood, it will only work with versions greater than or equal
-to *2.0.0*. The project can be installed as a gem on a target system:
+SearchMagic is built on top of mongoid; in all likelihood, it will only work with versions greater than or equal to *2.0.0*. The project can be installed as a gem on a target system:
 
 ```
 gem install search_magic
 ```
 
-For environments where bundler is being used, it can be installed by adding the following to your Gemfile and
-running `bundle`.
+For environments where bundler is being used, it can be installed by adding the following to your Gemfile and running `bundle`.
 
 ```
 gem 'search_magic'
@@ -27,16 +22,14 @@ Please check the [rubygems project](http://rubygems.org/gems/search_magic) for t
 
 ### Making a document searchable
 
-Got a document you want to add full text search capabilities to? Great! A few simple steps are all that are needed
-to get you up and running.
+Got a document you want to add full text search capabilities to? Great! A few simple steps are all that are needed to get you up and running.
 
 1. Include the **SearchMagic** module into your document!
 2. Tell SearchMagic about the data within your document you want to be searchable.
 3. ????
 4. Profit!
 
-Let's say we have a document for storing addresses in the database. The model might look a little something like
-the following: 
+Let's say we have a document for storing addresses in the database. The model might look a little something like the following: 
 
 ```ruby
 class Address
@@ -49,8 +42,7 @@ class Address
 end
 ```
 
-This boring little document is currently not searchable. However, with a splash of magic, we can make this document
-yield up its secrets to anyone who cares search for them.
+This boring little document is currently not searchable. However, with a splash of magic, we can make this document yield up its secrets to anyone who cares search for them.
 
 First up: include the **SearchMagic** module:
 
@@ -62,10 +54,7 @@ class Address
 end
 ```
 
-This will extend the document with a small suite of utility methods and capabilities, which will be covered later on.
-For now, the important thing to note is that merely adding in the module will not actually make anything searchable. 
-Full text search is an opt-in process, which means that you have complete control over which data you expose to prying
-eyes.
+This will extend the document with a small suite of utility methods and capabilities, which will be covered later on. For now, the important thing to note is that merely adding in the module will not actually make anything searchable. Full text search is an opt-in process, which means that you have complete control over which data you expose to prying eyes.
 
 So how do we ask the gem to work its magic? By asking it to search_on particular fields within the document!
 
@@ -79,9 +68,7 @@ class Address
 end
 ```
 
-We'll meet search_on a bit latter; just know for now that it is the method you call to register fields with the gem. In
-the previous example, we made each of the four fields of the document searchable. The great news is that the exact same
-process is used for virtual properties and associations.
+We'll meet search_on a bit latter; just know for now that it is the method you call to register fields with the gem. In the previous example, we made each of the four fields of the document searchable. The great news is that the exact same process is used for virtual properties and associations.
 
 ```ruby
 class Address
@@ -99,31 +86,25 @@ As long as it is invokable as an instance method on the document, SearchMagic ca
 
 ### Example searches on a searchable document
 
-Sure, marking up your data to make it searchable through SearchMagic is simply *fascinating*, but how do we go about
-actually searching the documents? Through one of the utility methods SearchMagic bundles in: search_for.
+Sure, marking up your data to make it searchable through SearchMagic is simply *fascinating*, but how do we go about actually searching the documents? Through one of the utility methods SearchMagic bundles in: search_for.
 
 ```ruby
 Address.search_for("Los Angeles CA")
 ```
 
-The preceding example is search at its most simplistic: trawling over the addresses, returning any which happen to have
-the values "Los", "Angeles", and "CA" somewhere within their searchable fields. Simplistic? Why, yes! SearchMagic also
-allows any search term within the query pattern to target any specific searchable field on that document. For example,
-what if we wanted to ensure that the text, "CA", only matched values coming from the :state field? Simple!
+The preceding example is search at its most simplistic: trawling over the addresses, returning any which happen to have the values "Los", "Angeles", and "CA" somewhere within their searchable fields. Simplistic? Why, yes! SearchMagic also allows any search term within the query pattern to target any specific searchable field on that document. For example, what if we wanted to ensure that the text, "CA", only matched values coming from the :state field? Simple!
 
 ```ruby
 Address.search_for("state:CA")
 ```
 
-That is, any term within the query pattern can specify a **selector** to specify which field you want to limit that term
-to. You can mix and match simple and complex terms within a single query: SearchMagic thrives on that sort of thing.
+That is, any term within the query pattern can specify a **selector** to specify which field you want to limit that term to. You can mix and match simple and complex terms within a single query: SearchMagic thrives on that sort of thing.
 
 ```ruby
 Address.search_for("Los Angeles state:CA")
 ```
 
-It is also possible to have multiple terms target the same field (as long as that makes semantic sense). 
-The result set returned by SearchMagic will contain all documents which have every term within it, be it simple or complex.
+It is also possible to have multiple terms target the same field (as long as that makes semantic sense). The result set returned by SearchMagic will contain all documents which have every term within it, be it simple or complex.
 
 ```ruby
 Address.search_for("city:Los city:Angeles state:CA")
@@ -131,12 +112,9 @@ Address.search_for("city:Los city:Angeles state:CA")
 Address.search_for("city:'Los Angeles' state:CA")
 ```
 
-As the previous example also shows, SearchMagic supports a shorthand notation for combining multiple terms together which
-are targeted to a specific field. Note that nothing is guaranteed about the contiguity of the terms when searched like this;
-the shorthand simply makes it a bit easier to find documents which have all the terms listed.
+As the previous example also shows, SearchMagic supports a shorthand notation for combining multiple terms together which are targeted to a specific field. Note that nothing is guaranteed about the contiguity of the terms when searched like this; the shorthand simply makes it a bit easier to find documents which have all the terms listed.
 
-Finally, it should be noted that all searches performed by SearchMagic are case-insensitive. Any of the previous examples
-could just as easily have been written with any mixture of cases, either for the selectors or for the values.
+Finally, it should be noted that all searches performed by SearchMagic are case-insensitive. Any of the previous examples could just as easily have been written with any mixture of cases, either for the selectors or for the values.
 
 ```ruby
 Address.search_for("city:'Los Angeles' state:CA")
@@ -154,13 +132,9 @@ Want to arrange your documents after you have searched for them? Look no further
 Address.search_for("state:ca").arrange(:city)
 ```
 
-Arrange currently can take up to two parameters; the first specifies which searchable field you want to order the result
-set by, while the second specifies the direction of the ordering. (This defaults to ascending.)
+Arrange currently can take up to two parameters; the first specifies which searchable field you want to order the result set by, while the second specifies the direction of the ordering. (This defaults to ascending.)
 
-Mongoid already come with a mechanism for [ordering documents](http://mongoid.org/docs/querying/criteria.html#order_by),
-so why does SearchMagic provide its own variant? Well, **arrange** is actually built on top of order_by. What it brings to
-the table is the ability to sort documents based off of any of the searchable fields a document can see --- including those
-coming from virtual attributes and associations.
+Mongoid already come with a mechanism for [ordering documents](http://mongoid.org/docs/querying/criteria.html#order_by), so why does SearchMagic provide its own variant? Well, **arrange** is actually built on top of order_by. What it brings to the table is the ability to sort documents based off of any of the searchable fields a document can see --- including those coming from virtual attributes and associations.
 
 We'll revisit this topic in more detail after looking at how associations work.
 
@@ -178,25 +152,15 @@ For the suggested standard usage of the gem, the first method might only be inte
 Address.searchables.keys # => [:street, :city, :state, :postal_code]
 ```
 
-This could be useful for ensuring that some text value you are dealing with is actually a searchable. For example, if you
-wanted to support sortable columns for a searchable document in a controller within a Rails app, you could use the 
-keys from the searchables hash to ensure you are not passing anything wonky to **arrange**. 
+This could be useful for ensuring that some text value you are dealing with is actually a searchable. For example, if you wanted to support sortable columns for a searchable document in a controller within a Rails app, you could use the keys from the searchables hash to ensure you are not passing anything wonky to **arrange**. 
 
-The second method is mentioned mostly to bring to attention the potential cost of SearchMagic: to ensure that searching
-is speedy and straight-forward, all data marked as searchable is replicated in a marked-up format within the searchable
-document. **search_for** constructs its criteria by referencing this particular array. If that type of data replication
-is undesirable, SearchMagic might not be the best choice for full text search. Please note that searchable_values is
-automatically maintained by the owning document: whenever the document is saved, a callback is invoked which updates the
-values. So, under normal usage circumstances, you should not be touching this array, and manually updating it is right out.
+The second method is mentioned mostly to bring to attention the potential cost of SearchMagic: to ensure that searching is speedy and straight-forward, all data marked as searchable is replicated in a marked-up format within the searchable document. **search_for** constructs its criteria by referencing this particular array. If that type of data replication is undesirable, SearchMagic might not be the best choice for full text search. Please note that searchable_values is automatically maintained by the owning document: whenever the document is saved, a callback is invoked which updates the values. So, under normal usage circumstances, you should not be touching this array, and manually updating it is right out.
 
-Similar caveats exist for **arrangeable_values**. Its main purpose is to enable **arrange** to perform sorting in a
-speedy, straight-forward fashion. 
+Similar caveats exist for **arrangeable_values**. Its main purpose is to enable **arrange** to perform sorting in a speedy, straight-forward fashion. 
 
 ## Global Configuration
 
-For the most part, configuration options are local to the documents and fields they are defined within. However, there
-are a few global options which are used across models, which can be altered through global configuration. These options
-(okay, for right now, "option", as there is only one) can be accessed through SearchMagic's **config** hash:
+For the most part, configuration options are local to the documents and fields they are defined within. However, there are a few global options which are used across models, which can be altered through global configuration. These options (okay, for right now, "option", as there is only one) can be accessed through SearchMagic's **config** hash:
 
 ```ruby
 SearchMagic.config # for global options!
@@ -206,17 +170,13 @@ Unless otherwise specified, for a Rails environment, it is suggested that these 
 
 ### :selector_value_separator
 
-SearchMagic stores data in **searchable_values** --- and eventually searches for data from the same location --- by
-marking up values with the field from which they originated. While slightly more complicated, this mark-up is
-essentially defined as:
+SearchMagic stores data in **searchable_values** --- and eventually searches for data from the same location --- by marking up values with the field from which they originated. While slightly more complicated, this mark-up is essentially defined as:
 
 ```ruby
 "#{field_path}#{separator}#{value}"
 ```
 
-The default separator is a colon, ":", as is rather obvious from the examples shown elsewhere in this document.
-This can be changed through the **selector_value_separator** configuration option to whatever makes sense for your
-use case:
+The default separator is a colon, ":", as is rather obvious from the examples shown elsewhere in this document. This can be changed through the **selector_value_separator** configuration option to whatever makes sense for your use case:
 
 ```ruby
 SearchMagic.config.selector_value_separator = '/'
@@ -224,9 +184,7 @@ address = Address.search_for("state/ca").first
 address.searchable_values # [..., "city/los", "city/angeles", "state/ca", ...]
 ```
 
-Note that **search_for** will immediately use the new separator value after a change is made to the configuration. However,
-no results may be returned, as pre-existing documents will still be using the previously defined separator. To force
-an update to your models, just re-save each one, and the **searchable_values** should be updated.
+Note that **search_for** will immediately use the new separator value after a change is made to the configuration. However,  no results may be returned, as pre-existing documents will still be using the previously defined separator. To force an update to your models, just re-save each one, and the **searchable_values** should be updated.
 
 Setting **selector_value_separator** to **nil** results in the same behavior as setting it to ':'.
 
@@ -234,20 +192,15 @@ Setting **selector_value_separator** to **nil** results in the same behavior as 
 
 ### search_on
 
-As described earlier in the document, fields are marked as searchable through use of the **search_on** class method, which
-takes one required parameter and a set of options. The required parameter specifies a method on the document which returns
-a value to be searched on. Mostly. The options allow for certain aspects of the library's default behavior to be overridden
-according to taste. The first parameter is also used by SearchMagic as the field name by which values in **searchable_values**
-are marked-up and searched by.
+As described earlier in the document, fields are marked as searchable through use of the **search_on** class method, which takes one required parameter and a set of options. The required parameter specifies a method on the document which returns a value to be searched on. Mostly. The options allow for certain aspects of the library's default behavior to be overridden according to taste. The first parameter is also used by SearchMagic as the field name by which values in **searchable_values** are marked-up and searched by.
 
 Options currently supported by search_on are:
 
-1. **as**: specifies a text value to override the default field name behavior; this allows a field to masquerade as something
-  else when its slumming about your interface:
+1. **as**: specifies a text value to override the default field name behavior; this allows a field to masquerade as something else when its slumming about your interface:
   
-  ```ruby
-  search_on :postal_code, :as => :zip_code
-  ```
+    ```ruby
+search_on :postal_code, :as => :zip_code
+```
 2. **keep_punctuation**:
 3. **skip_prefix**:
 4. **only**:
