@@ -122,8 +122,8 @@ to. You can mix and match simple and complex terms within a single query: Search
 Address.search_for("Los Angeles state:CA")
 ```
 
-If a particular field supports multiple values, you can even specify multiple values for that field. The result set returned
-by SearchMagic will contain all documents which have every term within it, be it simple or complex.
+It is also possible to have multiple terms target the same field (as long as that makes semantic sense). 
+The result set returned by SearchMagic will contain all documents which have every term within it, be it simple or complex.
 
 ```ruby
 Address.search_for("city:Los city:Angeles state:CA")
@@ -206,9 +206,10 @@ Unless otherwise specified, for a Rails environment, it is suggested that these 
 
 ### :selector_value_separator
 
-SearchMagic stores data in **searchable_values** --- and eventually search for data from the same location --- by
+SearchMagic stores data in **searchable_values** --- and eventually searches for data from the same location --- by
 marking up values with the field from which they originated. While slightly more complicated, this mark-up is
 essentially defined as:
+
 ```ruby
 "#{field_path}#{separator}#{value}"
 ```
@@ -227,13 +228,32 @@ Note that **search_for** will immediately use the new separator value after a ch
 no results may be returned, as pre-existing documents will still be using the previously defined separator. To force
 an update to your models, just re-save each one, and the **searchable_values** should be updated.
 
+Setting **selector_value_separator** to **nil** results in the same behavior as setting it to ':'.
+
 ## A little more depth...
+
 ### search_on
-#### :as
-#### :keep_punctuation
+
+As described earlier in the document, fields are marked as searchable through use of the **search_on** class method, which
+takes one required parameter and a set of options. The required parameter specifies a method on the document which returns
+a value to be searched on. Mostly. The options allow for certain aspects of the library's default behavior to be overridden
+according to taste. The first parameter is also used by SearchMagic as the field name by which values in **searchable_values**
+are marked-up and searched by.
+
+Options currently supported by search_on are:
+
+1. **as**: specifies a text value to override the default field name behavior; this allows a field to masquerade as something
+  else when its slumming about your interface:
+  
+  ```ruby
+  search_on :postal_code, :as => :zip_code
+  ```
+2. **keep_punctuation**:
+3. **skip_prefix**:
+4. **only**:
+5. **except**:
+
 #### search trees
-##### :skip_prefix, :as revisted
-##### :only / :except
 ##### cyclic searches
 ### search_for
 #### natural language date processing via chronic
