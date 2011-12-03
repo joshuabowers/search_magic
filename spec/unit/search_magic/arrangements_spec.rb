@@ -47,7 +47,7 @@ describe SearchMagic::FullTextSearch do
     before(:each) do
       Asset.create(:title => "Foo Bar: The Bazzening", :description => "Sequel to last years hit summer blockbuster.", :tags => ["movies", "suspense", "foo.bar", "the-bazzening"])
       Asset.create(:title => "Undercover Foo", :description => "When a foo goes undercover, how far will he go to protect those he loves?", :tags => ["movies", "action", "undercover.foo"])
-      Asset.create(:title => "Cheese of the Damned", :description => "This is not your father's munster.", :tags => ["movies", "horror", "cheese", "munster"])
+      Asset.create(:title => "Cheese of the Damned", :description => "This is not your father's munster.", :tags => ["movies", "horror", "cheese", "munster", "zamorano"])
     end
     
     context "when arranging a model by nil" do
@@ -108,6 +108,6 @@ describe SearchMagic::FullTextSearch do
     
     it_should_behave_like "arranged assets", :title, :desc, ["Undercover Foo", "Foo Bar: The Bazzening", "Cheese of the Damned"]
     it_should_behave_like "arranged assets", :description, :desc, ["Undercover Foo", "Cheese of the Damned", "Foo Bar: The Bazzening"]
-    it_should_behave_like "arranged assets", :tag, :desc, ["Foo Bar: The Bazzening", "Cheese of the Damned", "Undercover Foo"]
+    it_should_behave_like "arranged assets", :tag, :desc, ["Cheese of the Damned", "Undercover Foo", "Foo Bar: The Bazzening"]
   end
 end
