@@ -37,9 +37,11 @@ module SearchMagic
             selector = term.length > 1 ? Regexp.escape(term.first) : "[^#{separator}]+"
             metadata = searchables[term.first.to_sym] if term.length > 1
             parsed_date = Chronic.parse(term.last) if metadata && metadata.datable?
+            prefix = "#{selector}#{separator}"
+            prefix = "(#{prefix})?" if term.length == 1
             fragment = /#{selector}#{separator}#{parsed_date}/i if parsed_date
             fragment || term.last.scan(/\b(\S+)\b/).flatten.map do |word|
-              /#{selector}#{separator}.*#{Regexp.escape(word)}/i
+              /#{prefix}.*#{Regexp.escape(word)}/i
             end
           end.flatten
           all_in(:searchable_values => terms)

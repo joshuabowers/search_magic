@@ -19,6 +19,10 @@ module SearchMagic
     def datable?
       @datable ||= [Date, DateTime, Time].include? self.type
     end
+    
+    def unnameable?
+      @unnameable ||= self.name == :""
+    end
   
     def value_for(obj, keep_punctuation)
       v = get_value(obj)
@@ -32,7 +36,7 @@ module SearchMagic
     end
   
     def searchable_value_for(obj)
-      value_for(obj, options[:keep_punctuation]).downcase.split.map {|word| [name, word].join(SearchMagic.config.selector_value_separator || ':')}
+      value_for(obj, options[:keep_punctuation]).downcase.split.map {|word| [name.blank? ? nil : name, word].compact.join(SearchMagic.config.selector_value_separator || ':')}
     end
     
     private

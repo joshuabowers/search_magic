@@ -140,7 +140,15 @@ describe SearchMagic::FullTextSearch do
   context "when searching for a model with :skip_prefix on a field" do
     before(:each) do
       5.times { Fabricate(:field_skip_prefix) }
-      Fabricate(:field_skip_prefix, :name => "Dirigible")
+    end
+    
+    let(:dirigible) { Fabricate(:field_skip_prefix, :name => "Dirigible") }
+    
+    context "the field should not be prefixed in :searchable_values" do
+      subject { dirigible }
+      its(:searchable_values) { should include("dirigible") }
+      its(:searchable_values) { should_not include("name:dirigible") }
+      its(:searchable_values) { should_not include(":dirigible") }
     end
     
     context "searching on that field should return nothing" do
