@@ -29,9 +29,10 @@ module SearchMagic
       end
       
       def search_for(pattern)
+        options, pattern = strip_option_terms_from(pattern)
         terms = terms_for(pattern)
         unless terms.blank?
-          all_in(:searchable_values => terms)
+          send( :"#{options[:mode] || "all"}_in", :searchable_values => terms)
         else
           criteria
         end
@@ -42,8 +43,15 @@ module SearchMagic
         arrangeable.blank? || !searchables.keys.include?(arrangeable.to_sym) ? criteria : order_by([["arrangeable_values.#{arrangeable}", direction]])
       end
       
+      def strip_option_terms_from(pattern)
+        unless pattern.blank?
+          [Hash[*(pattern.scan(option_terms).flatten)].symbolize_keys, pattern.gsub(option_terms, '').strip]
+        else
+          [{}, pattern]
+        end
+      end
+      
       def terms_for(pattern)
-        separator = Regexp.escape(SearchMagic.config.selector_value_separator || ':')
         rval = /("[^"]+"|'[^']+'|\S+)/
         rsearch = /(?:(#{searchables.keys.join('|')})#{separator}#{rval})|#{rval}/i
         unless pattern.blank?
@@ -64,6 +72,18 @@ module SearchMagic
       end
       
       private
+      
+      def option_terms
+        @option_terms ||= Regexp.union( 
+          *{
+            :mode => [:all, :any]
+          }.map {|key, value| /(#{key})#{separator}(#{value.join('|')})/i}
+        )
+      end
+      
+      def separator
+        @separator ||= Regexp.escape(SearchMagic.config.selector_value_separator || ':')
+      end
       
       def create_searchables
         stack, visited, fields = [StackFrame.new(self)], {}, []
@@ -88,6 +108,7 @@ module SearchMagic
     end
     
     def values_matching(pattern)
+      options, pattern = self.class.strip_option_terms_from(pattern)
       terms = self.class.terms_for(pattern)
       r = Regexp.union(*terms)
       searchable_values.grep(r)
