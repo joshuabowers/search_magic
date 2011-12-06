@@ -42,7 +42,7 @@ module SearchMagic
     private
     
     def get_value(obj)
-      self.through.map(&:field_name).inject(obj) {|memo, method| memo.is_a?(Array) ? memo.map{|o| o.send(method)} : memo.send(method)}
+      self.through.map(&:field_name).inject(obj) {|memo, method| memo.present? ? (memo.is_a?(Array) ? memo.map{|o| o.send(method)} : memo.send(method)) : nil}
     end
     
     def post_process(value)
