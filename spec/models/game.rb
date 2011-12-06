@@ -9,7 +9,8 @@ class Game
   referenced_in :developer
   
   search_on :title
-  search_on :price
+  search_on :price, :keep_punctuation => true
   search_on :high_score
+  search_on :released_on, :keep_punctuation => true
   search_on :developer, :except => :opened_on
 end

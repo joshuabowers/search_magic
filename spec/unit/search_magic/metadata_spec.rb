@@ -12,7 +12,7 @@ describe SearchMagic::Metadata do
   end
   
   context "when dealing with breadcrumbs with :skip_prefix" do
-    subject { SearchMagic::Metadata.new(through: [SearchMagic::Breadcrumb.new(:foo, {skip_prefix: true}), SearchMagic::Breadcrumb.new(:bar, {})]) }
+    subject { SearchMagic::Metadata.new(:through => [SearchMagic::Breadcrumb.new(:foo, {:skip_prefix => true}), SearchMagic::Breadcrumb.new(:bar, {})]) }
     its(:name) { should == :bar }
   end
   
