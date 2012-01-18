@@ -299,7 +299,7 @@ As you can see, Game remains the same, while Developer gains a few extra searcha
 
 ### arrange
 
-Now that we've explored the search graph, its time to revisit arranging data. Any values coming from a document's searchables are replicated in a hash within that document: its **arrangeable_values**. Will slightly costly, when it comes to replicating data across a document hierarchy, it provides a very clever trick: it allows a document to be sorted by any of its searchables, regardless of where they come from. It matters not whether the searchable is a field on the defining document or on an association. It matters not whether a field is coming from a referenced or an embedded document. All are welcome, and all are handled exactly the same.
+Now that we've explored the search graph, its time to revisit arranging data. Any values coming from a document's searchables are replicated in a hash within that document: its **arrangeable_values**. While slightly costly, when it comes to replicating data across a document hierarchy, it provides a very clever trick: it allows a document to be sorted by any of its searchables, regardless of where they come from. It matters not whether the searchable is a field on the defining document or on an association. It matters not whether a field is coming from a referenced or an embedded document. All are welcome, and all are handled exactly the same.
 
 Using the running examples from the last sections, let's explore some example usage:
 
