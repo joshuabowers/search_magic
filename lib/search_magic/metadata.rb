@@ -23,6 +23,10 @@ module SearchMagic
     def unnameable?
       @unnameable ||= self.name == :""
     end
+    
+    def hashable?
+      @hashable ||= self.type <= Hash
+    end
   
     def value_for(obj, keep_punctuation)
       v = get_value(obj)
