@@ -58,11 +58,11 @@ module SearchMagic
       def terms_for(pattern)
         rval = /("[^"]+"|'[^']+'|\S+)/
         rnot_separator = "[^#{separator}]+"
-        rsearch = /(?:(#{searchables.keys.join('|')})#{separator}#{rval})|#{rval}/i
+        rsearch = /(?:(#{searchable_names})#{separator}#{rval})|#{rval}/i
         unless pattern.blank?
           terms = pattern.scan(rsearch).map(&:compact).map do |term|
             selector = term.length > 1 ? Regexp.escape(term.first) : rnot_separator
-            metadata = searchables[term.first.to_sym] if term.length > 1
+            metadata = searchables[term.first.match(/^[^:]+/)[0].to_sym] if term.length > 1
             parsed_date = Chronic.parse(term.last) if metadata && metadata.datable?
             prefix = "#{selector}#{separator}"
             prefix = "(#{prefix})?" if term.length == 1
@@ -77,6 +77,10 @@ module SearchMagic
       end
       
       private
+      
+      def searchable_names
+        @searchable_names ||= searchables.values.map {|metadata| metadata.search_regex_fragment}.join("|")
+      end
       
       def option_terms
         @option_terms ||= Regexp.union( 

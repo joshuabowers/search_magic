@@ -234,7 +234,7 @@ Game.searchables.keys # [:title, :price, :high_score, :developer_name, :develope
 
 See how the searchables from Developer were automatically added to Game? Only those fields which are within Developer's search graph will be subsumed into Game. Notice how there is a field and an association within Document which are not being searched on? Those are not added to Game's searchables.
 
-Take another look at Game's searchables. Notice the way that fields coming from an association are handled? They are receive a prefix equivalent to the name of the association. This allows SearchMagic to build rather complex search graphs without having to necessarily worry about weird aliasing issues. The values coming from these fields will be stored within each Game instance's **searchable_values** with this prefixed name, and **search_for** will likewise be expecting the use of the prefixed names.
+Take another look at Game's searchables. Notice the way that fields coming from an association are handled? They all receive a prefix equivalent to the name of the association. This allows SearchMagic to build rather complex search graphs without having to necessarily worry about weird aliasing issues. The values coming from these fields will be stored within each Game instance's **searchable_values** with this prefixed name, and **search_for** will likewise be expecting the use of the prefixed names.
 
 ```ruby
 game = Game.search_for("developer_name:bethesda title:skyrim").first
@@ -267,7 +267,7 @@ There are three important things to note about this:
 2. All of the searchables coming from **games** are prefixed with the singular form of the association name.
 3. This includes even those searchables which are, themselves, representative of an association.
 
-SearchMagic should be able to handle as complex of a document graph as you care to throw at it. (*SearchMagic and its developer are not liable for computer's exploding while attempting to process crazy large document graphs.*) While the running example is fairly linear, you are not limited to simple paths like this: you can have search graphs which are as broad and deep as you like. Which leads us to the next topic.
+SearchMagic should be able to handle as complex of a document graph as you care to throw at it. (*SearchMagic and its developer are not liable for computers exploding while attempting to process crazy large document graphs.*) While the running example is fairly linear, you are not limited to simple paths like this: you can have search graphs which are as broad and deep as you like. Which leads us to the next topic.
 
 #### Cyclic Searches
 

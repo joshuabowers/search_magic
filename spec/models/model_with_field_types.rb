@@ -7,6 +7,7 @@ class ModelWithFieldTypes
   field :date_field, :type => Date
   field :float_field, :type => Float
   field :bool_field, :type => Boolean
+  field :hash_field, :type => Hash
   
   def some_value
     true
@@ -18,5 +19,6 @@ class ModelWithFieldTypes
   search_on :date_field
   search_on :float_field
   search_on :bool_field
+  search_on :hash_field
   search_on :some_value
 end
