@@ -28,6 +28,10 @@ module SearchMagic
           map(&:first).map(&:name)
       end
       
+      # To support range searches, this will need to become more complicated. Specifically, it will need to be able
+      # to remove any term which contains a [:below, :before, :above, :after] selector, retreive the base selector and
+      # the target valuee, and match the latter against the former within the :arrangeable_values array as part of
+      # the returned criteria. How this then translates to :values_matching is currently unknown.
       def search_for(pattern)
         options, pattern = strip_option_terms_from(pattern)
         terms = terms_for(pattern)
@@ -53,10 +57,11 @@ module SearchMagic
       
       def terms_for(pattern)
         rval = /("[^"]+"|'[^']+'|\S+)/
+        rnot_separator = "[^#{separator}]+"
         rsearch = /(?:(#{searchables.keys.join('|')})#{separator}#{rval})|#{rval}/i
         unless pattern.blank?
           terms = pattern.scan(rsearch).map(&:compact).map do |term|
-            selector = term.length > 1 ? Regexp.escape(term.first) : "[^#{separator}]+"
+            selector = term.length > 1 ? Regexp.escape(term.first) : rnot_separator
             metadata = searchables[term.first.to_sym] if term.length > 1
             parsed_date = Chronic.parse(term.last) if metadata && metadata.datable?
             prefix = "#{selector}#{separator}"

@@ -32,18 +32,26 @@ describe SearchMagic do
     
     context "with a :below selector" do
       it_should_behave_like "a simple range search", :high_score, :below, 1000, 3
+      it_should_behave_like "a simple range search", :price, :below, 50.00, 2
+      it_should_behave_like "a simple range search", :released_on, :below, 1.year.ago, 2
     end
     
     context "with a :before selector" do
-      pending
+      it_should_behave_like "a simple range search", :high_score, :before, 1000, 3
+      it_should_behave_like "a simple range search", :price, :before, 50.00, 2
+      it_should_behave_like "a simple range search", :released_on, :before, 1.year.ago, 2
     end
     
     context "with an :above selector" do
-      pending
+      it_should_behave_like "a simple range search", :high_score, :above, 1000, 2
+      it_should_behave_like "a simple range search", :price, :above, 50.00, 4
+      it_should_behave_like "a simple range search", :released_on, :above, 1.year.ago, 4
     end
     
     context "with an :after selector" do
-      pending
+      it_should_behave_like "a simple range search", :high_score, :after, 1000, 2
+      it_should_behave_like "a simple range search", :price, :after, 50.00, 4
+      it_should_behave_like "a simple range search", :released_on, :after, 1.year.ago, 4
     end
   end
 end
