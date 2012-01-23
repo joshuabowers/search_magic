@@ -4,7 +4,7 @@ SearchMagic provides full-text search capabilities to [mongoid](http://github.co
 
 ## Installation
 
-SearchMagic is built on top of mongoid; in all likelihood, it will only work with versions greater than or equal to *2.0.0*. The project can be installed as a gem on a target system:
+SearchMagic is built on top of mongoid; in all likelihood, it will only work with versions greater than or equal to *2.0.0*. However, see Upgrading for information related to bugs which might be fixed due to newer versions of mongoid. The project can be installed as a gem on a target system:
 
 ```
 gem install search_magic
@@ -160,7 +160,7 @@ Similar caveats exist for **arrangeable_values**. Its main purpose is to enable 
 
 ## Global Configuration
 
-For the most part, configuration options are local to the documents and fields they are defined within. However, there are a few global options which are used across models, which can be altered through global configuration. These options (okay, for right now, "option", as there is only one) can be accessed through SearchMagic's **config** hash:
+For the most part, configuration options are local to the documents and fields they are defined within. However, there are a few global options which are used across models, which can be altered through global configuration. These options can be accessed through SearchMagic's **config** hash:
 
 ```ruby
 SearchMagic.config # for global options!
@@ -187,6 +187,10 @@ address.searchable_values # [..., "city/los", "city/angeles", "state/ca", ...]
 Note that **search_for** will immediately use the new separator value after a change is made to the configuration. However,  no results may be returned, as pre-existing documents will still be using the previously defined separator. To force an update to your models, just re-save each one, and the **searchable_values** should be updated.
 
 Setting **selector_value_separator** to **nil** results in the same behavior as setting it to ':'.
+
+### :presence_detector
+
+Defaults to '?'. This is the token matched by **search_for** to signal that a simple presence detection query fragment is being requested.
 
 ## A little more depth...
 
@@ -390,6 +394,10 @@ Developer.search_for("opened_on:'January 1986'")
 ```
 
 Note, in order for the natural language processing to be invoked properly, the *value* part of a search must be wrapped in quotes; multiple occurrences of a datable searchable will be processed separately, rather than as a unit.
+
+## Upgrading
+
+* **0.3.0**: Mongoid 2.4.3 or greater is now required, to facilitate the use of the **search_for** scope on an embedded document from within a non-searchable parent.
 
 ## Problems? Comments?
 

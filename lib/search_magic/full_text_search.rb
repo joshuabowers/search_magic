@@ -58,7 +58,7 @@ module SearchMagic
       def terms_for(pattern)
         rval = /("[^"]+"|'[^']+'|\S+)/
         rnot_separator = "[^#{separator}]+"
-        rsearch = /(?:(#{searchable_names})(?:#{separator}#{rval}|(\?)))|#{rval}/i
+        rsearch = /(?:(#{searchable_names})(?:#{separator}#{rval}|(#{presence_detector_escaped})))|#{rval}/i
         unless pattern.blank?
           terms = pattern.scan(rsearch).map(&:compact).map do |term|
             selector = term.length > 1 ? Regexp.escape(term.first) : rnot_separator
@@ -67,7 +67,7 @@ module SearchMagic
             prefix = "#{selector}#{separator}"
             prefix = "(#{prefix})?" if term.length == 1
             fragment = /^#{selector}#{separator}#{parsed_date}/i if parsed_date
-            fragment = /^#{prefix}[^#{separator}\s]+/i if term.last == '?'
+            fragment = /^#{prefix}[^#{separator}\s]+/i if term.last == presence_detector
             fragment || term.last.scan(/\b(\S+)\b/).flatten.map do |word|
               /^#{prefix}.*#{Regexp.escape(word)}/i
             end
@@ -89,6 +89,14 @@ module SearchMagic
             :mode => [:all, :any]
           }.map {|key, value| /(#{key})#{separator}(#{value.join('|')})/i}
         )
+      end
+      
+      def presence_detector_escaped
+        @presence_detector_escaped ||= Regexp.escape(presence_detector)
+      end
+      
+      def presence_detector
+        @presence_detector ||= (SearchMagic.config.presence_detector || '?')
       end
       
       def separator
