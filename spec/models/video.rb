@@ -2,7 +2,7 @@ class Video
   include Mongoid::Document
   include SearchMagic
   field :title, :type => String
-  field :metadata, :type => Hash, :default => {}
+  field :extra, :type => Hash, :default => {}
   search_on :title
-  search_on :metadata, :as => :metadata
+  search_on :extra
 end

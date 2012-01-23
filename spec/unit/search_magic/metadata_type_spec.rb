@@ -7,7 +7,7 @@ describe SearchMagic do
   end
   
   context "when included in a model which defines field types" do
-    it_behaves_like "metadata", :generic_field, Mongoid::Fields::Serializable::Object, false, "generic_field"
+    it_behaves_like "metadata", :generic_field, Object, false, "generic_field"
     it_behaves_like "metadata", :string_field, String, true, "string_field"
     it_behaves_like "metadata", :float_field, Float, true, "float_field"
     it_behaves_like "metadata", :int_field, Integer, true, "int_field"
