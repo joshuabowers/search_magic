@@ -55,14 +55,10 @@ module SearchMagic
         end
       end
       
-      # Will need to alter rsearch:
-      #   Either support (#{separator}#{rval}) or (\?) following searchable_names...
-      # presence detection if it yields \?
-      #   Essentially alters the search regex as: /#{prefix}.*/i
       def terms_for(pattern)
         rval = /("[^"]+"|'[^']+'|\S+)/
         rnot_separator = "[^#{separator}]+"
-        rsearch = /(?:(#{searchable_names})#{separator}#{rval})|#{rval}/i
+        rsearch = /(?:(#{searchable_names})(?:#{separator}#{rval}|(\?)))|#{rval}/i
         unless pattern.blank?
           terms = pattern.scan(rsearch).map(&:compact).map do |term|
             selector = term.length > 1 ? Regexp.escape(term.first) : rnot_separator
@@ -71,6 +67,7 @@ module SearchMagic
             prefix = "#{selector}#{separator}"
             prefix = "(#{prefix})?" if term.length == 1
             fragment = /^#{selector}#{separator}#{parsed_date}/i if parsed_date
+            fragment = /^#{prefix}[^#{separator}\s]+/i if term.last == '?'
             fragment || term.last.scan(/\b(\S+)\b/).flatten.map do |word|
               /^#{prefix}.*#{Regexp.escape(word)}/i
             end
