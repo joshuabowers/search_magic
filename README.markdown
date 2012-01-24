@@ -138,6 +138,55 @@ Mongoid already comes with a mechanism for [ordering documents](http://mongoid.o
 
 We'll revisit this topic in more detail after looking at how associations work.
 
+### Instance values matching a search pattern
+
+_(As of version 0.3.0.)_
+
+Searchable documents gain an instance method, **values_matching**, which takes one parameter, a search **pattern**, returning the entries in **searchable_values** which match **pattern**. This method behaves similarly to **search_for**; notably, it will take any input accepted by **search_for**.
+
+```ruby
+pattern = "los angeles state:ca"
+address = Address.search_for(pattern).first
+address.values_matching(pattern)            # ["city:los", "city:angeles", "state:ca"]
+```
+
+As can be inferred from the previous example, this can be useful for discerning which selectors of a given document are matching specific text. It can also be useful for determining which data is present in a given document, when altering the search mode.
+
+### Altering the search mode
+
+_(As of version 0.3.0.)_
+
+The search mode establishes how each successive query fragment winnows the result set of the search. Two different search modes are supported by SearchMagic:
+
+1. **all**: in this mode, a matching document must have data that satisfies each query fragment of the search pattern;
+2. **any**: in this mode, a matching document must have data that satisfies at least one query fragment of the search pattern.
+
+The mode is alterable on a per-query basis through the **mode** selector. Should **mode** be absent from a query, the query defaults to the **all** behavior. Despite the examples, please note that **mode** need not be specified first within a pattern; its presence anywhere within the pattern is sufficient. However, also note that successive instances within a query will overwrite previous instances.
+
+The following two searches are equivalent: they both return all addresses which represent a location within Los Angeles, CA.
+
+```ruby
+Address.search_for("mode:all city:'los angeles' state:ca")
+Address.search_for("city:'los angeles' state:ca")
+```
+
+However, the following search is more expansive: it matches all addresses which represent a location either within Los Angeles, or within the state of California.
+
+```ruby
+Address.search_for("mode:any city:'los angeles' state:ca")
+```
+
+### Searching within an embedded hash
+
+_(As of version 0.3.0.)_
+
+
+### "I sense something; a presence I've not felt since..."
+
+_(As of version 0.3.0.)_
+
+All about the presence detection.
+
 ### Querying docs about their searchables
 
 SearchMagic provides some utility methods which can be used to find out information about a document's searchable fields:

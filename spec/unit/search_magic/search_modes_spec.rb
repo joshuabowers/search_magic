@@ -8,6 +8,9 @@ describe SearchMagic do
     it { subject.strip_option_terms_from("tag:foo").should == [{}, "tag:foo"] }
     it { subject.strip_option_terms_from("mode:any tag:foo").should == [{:mode => "any"}, "tag:foo"] }
     it { subject.strip_option_terms_from("mode:all tag:foo").should == [{:mode => "all"}, "tag:foo"] }
+    it { subject.strip_option_terms_from("mode:all mode:any").should == [{:mode => "any"}, ""] }
+    it { subject.strip_option_terms_from("mode:any mode:all").should == [{:mode => "all"}, ""] }
+    it { subject.strip_option_terms_from("mode:all mode:any mode:all").should == [{:mode => "all"}, ""] }
   end
   context "when searching" do
     before(:each) do
