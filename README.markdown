@@ -205,7 +205,21 @@ Which is to say that searching a hash takes the form of specifying the hash fiel
 
 _(As of version 0.3.0.)_
 
+Most of the useful functionality provided by SearchMagic is to be found in searching the document search graph for specific values. However, it can also be useful to simply determine whether a given selector has any value, rather than a particular one. This can be done through a simple presence detection test, which matches a given document if the document has a value set on the (searchable) field.
 
+For example, to search for all addresses which have a **postal_code** set, the following query might be used:
+
+```ruby
+Address.search_for("postal_code?") # i.e. all addresses for which address.postal_code.present? would return true.
+```
+
+Which is to say that a presence detection query fragment is formed by specifying a selector followed by a question mark (**?**). This can be especially useful for determining if an embedded hash has a value present for a given key:
+
+```ruby
+Video.search_for("data:duration?") # i.e. all videos for which video.data[duration].present? would return true.
+```
+
+Note that Boolean searchable fields will automatically transcribe the boolean value into either true or false; presence detection does not currently take this into consideration, so while a presence detection fragment will match a selector which evaluates to true, it will also match a selector which evaluates to false.
 
 ### Querying docs about their searchables
 
