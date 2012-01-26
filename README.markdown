@@ -273,7 +273,15 @@ Setting **selector_value_separator** to **nil** results in the same behavior as 
 
 ### :presence_detector
 
+_(As of 0.3.0)_
+
 Defaults to '?'. This is the token matched by **search_for** to signal that a simple presence detection query fragment is being requested.
+
+### :default_search_mode
+
+_(As of 0.3.0)_
+
+Defaults to 'all'. This is the search mode that will be used by default unless overridden by a **mode** query fragment. While this can be set to anything, the only values which alter behavior are **nil**, **:all/"all"**, and **:any/"any"**. Setting this to nil causes the default behavior.
 
 ## A little more depth...
 
