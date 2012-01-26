@@ -36,7 +36,7 @@ module SearchMagic
         options, pattern = strip_option_terms_from(pattern)
         terms = terms_for(pattern)
         unless terms.blank?
-          send( :"#{options[:mode] || "all"}_in", :searchable_values => terms)
+          send( :"#{options[:mode] || default_search_mode}_in", :searchable_values => terms)
         else
           criteria
         end
@@ -101,6 +101,10 @@ module SearchMagic
       
       def separator
         @separator ||= Regexp.escape(SearchMagic.config.selector_value_separator || ':')
+      end
+      
+      def default_search_mode
+        Regexp.escape(([SearchMagic.config.default_search_mode.to_s] & %w{all any}).first || 'all')
       end
       
       def create_searchables
