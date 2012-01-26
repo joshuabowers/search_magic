@@ -180,12 +180,32 @@ Address.search_for("mode:any city:'los angeles' state:ca")
 
 _(As of version 0.3.0.)_
 
+Embedded hashes are handled slightly differently from normal searchable fields: like normal fields, the hash selector follows normal naming rules, but keys are specified with an extra **":"** separator. 
+
+```ruby
+class Video
+  include Mongoid::Document
+  include SearchMagic
+  field :data, type: Hash, default: {}
+  search_on :data
+end
+```
+
+Given the preceding class definition, which defines a searchable hash field called **data**, a search may be performed on arbitrary keys within **data** in the following manner:
+
+```ruby
+Video.search_for("data:resolution:1080p")
+Video.search_for("data:director:'Tim Burton'")
+Video.search_for("data:duration:#{60.minutes}")
+```
+
+Which is to say that searching a hash takes the form of specifying the hash field selector, followed by a colon separator and the specific key, followed by a colon separator and the specific value for the key. Values are handled according to other rules specified within this document. In this format, the hash field selector and the specified key act as the full selector for the query fragment.
 
 ### "I sense something; a presence I've not felt since..."
 
 _(As of version 0.3.0.)_
 
-All about the presence detection.
+
 
 ### Querying docs about their searchables
 
