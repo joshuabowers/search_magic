@@ -6,7 +6,7 @@ describe SearchMagic do
     
     context "an embedded documents searchable_values should not be empty" do
       subject { User.first.watchlists.first }
-      its(:searchable_values) { should == [] }
+      its(:searchable_values) { should == %w[description:watchlist description:0] }
     end
     
     context "directly searching an embedded document" do
@@ -20,14 +20,13 @@ describe SearchMagic do
     end
     
     context "directly searching the searchable_values of an embedded document" do
-      subject { User.first.watchlists.any_in(:searchable_values => [/^([^:]+:)?.*watchlist/i]) }
-      its(:selector) { should == {:searchable_values => {"$in" => [/^([^:]+:)?.*watchlist/i]}} }
+      subject { User.first.watchlists.all_in(:searchable_values => [/^([^:]+:)?.*watchlist/i]) }
+      its(:selector) { should == {:searchable_values => {"$all" => [/^([^:]+:)?.*watchlist/i]}} }
       its(:count) { should == 5 }
     end
     
     context "the search query should be" do
       subject { User.first.watchlists.search_for("watchlist") }
-      it { should == nil }
       its(:selector) { should == {:searchable_values => {"$all" => [/^([^:]+:)?.*watchlist/i]}} }
       it { expect { subject.count }.to_not raise_error }
       its(:count) { should == 5 }
