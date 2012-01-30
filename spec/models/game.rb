@@ -13,4 +13,5 @@ class Game
   search_on :high_score
   search_on :released_on, :keep_punctuation => true
   search_on :developer, :except => :opened_on
+  search_on :players
 end

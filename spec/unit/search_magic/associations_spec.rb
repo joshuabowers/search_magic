@@ -18,14 +18,19 @@ describe SearchMagic::FullTextSearch do
   
   context "when a model excludes an associated documents fields" do
     subject { Game }
-    its("searchables.keys") { should include(:title, :price, :high_score, :released_on, :developer_name) }
-    its("searchables.keys") { should_not include(:developer_opened_on) }
+    its("searchables.keys") { should include(:title, :price, :high_score, :released_on, :developer_name, :player_name) }
+    its("searchables.keys") { should_not include(:developer_opened_on, :player_game_name, :developer_game_title) }
   end
   
   context "when a model only includes certain fields from an associated document" do
     subject { Player }
     its("searchables.keys") { should include(:name, :game_title, :game_developer_name) }
     its("searchables.keys") { should_not include(:game_price, :game_high_score, :game_released_on, :game_developer_opened_on)}
+  end
+  
+  context "when a model is part of a cycle" do
+    subject { Developer }
+    its("searchables.keys") { should =~ [:name, :opened_on, :game_title, :game_price, :game_high_score, :game_released_on, :game_player_name]}
   end
   
   context "when a model embeds one other document" do

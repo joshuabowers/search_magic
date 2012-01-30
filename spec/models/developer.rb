@@ -7,4 +7,5 @@ class Developer
   
   search_on :name
   search_on :opened_on
+  search_on :games
 end

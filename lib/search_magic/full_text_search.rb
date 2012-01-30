@@ -24,7 +24,7 @@ module SearchMagic
       def inverse_searchables
         @inverse_searchables ||= relations.values.
           map {|metadata| [metadata, metadata.class_name.constantize] }.
-          select {|metadata, klass| klass < SearchMagic::FullTextSearch && klass.searchable_fields.keys.include?(metadata.inverse_setter.chomp("=").to_sym)}.
+          select {|metadata, klass| klass < SearchMagic::FullTextSearch && klass.searchable_fields.keys.include?(metadata.inverse)}.
           map(&:first).map(&:name)
       end
       
@@ -108,18 +108,18 @@ module SearchMagic
       end
       
       def create_searchables
-        stack, visited, fields = [StackFrame.new(self)], {}, []
+        stack, visited, fields = [StackFrame.from_type(self)], Set.new, []
         until stack.empty?
           current = stack.shift
-          unless visited.has_key?(current.type)
-            visited[current.type] = true
-            current.type.searchable_fields.each do |field_name, options|
+          unless visited.include?(current.token)
+            visited |= [current.token, current.inverse_token]
+            current.target_type.searchable_fields.each do |field_name, options|
               next unless current.wants_field?(field_name)
               path = current.path.clone + [Breadcrumb.new(field_name, options)]
-              if association = current.type.reflect_on_association(field_name)
-                stack << StackFrame.new(association.class_name.constantize, path)
+              if association = current.target_type.reflect_on_association(field_name)
+                stack << StackFrame.new(current.target_type, association, path)
               else
-                fields << Metadata.new(:type => current.type.fields[field_name.to_s].try(:type) || Object, :through => path, :options => options)
+                fields << Metadata.new(:type => current.target_type.fields[field_name.to_s].try(:type) || Object, :through => path, :options => options)
               end
             end
           end
