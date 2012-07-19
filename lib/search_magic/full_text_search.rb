@@ -5,9 +5,9 @@ module SearchMagic
     included do
       class_attribute :searchable_fields, :instance_writer => false
       self.searchable_fields = {}
-      field :searchable_values, :type => Array, :default => []
+      # field :searchable_values, :type => Array, :default => []
       field :arrangeable_values, :type => Hash, :default => {}
-      # embeds_many :searchable_values, as: :searchable
+      embeds_many :searchable_values, as: :searchable
       before_save :update_searchable_values
       before_save :update_arrangeable_values
       after_save :update_associated_documents
