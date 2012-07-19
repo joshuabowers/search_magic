@@ -24,7 +24,7 @@ describe SearchMagic do
       if expected_value.present?
         context "the criteria \"extra:#{key}:#{expected_value}\"" do
           subject { Video.search_for("extra:#{key}:#{expected_value}") }
-          its(:selector) { should == {:searchable_values => {"$all" => expected_value.gsub(/^'([^']+)'$/, '\1').split.map {|word| /^extra:#{key}:.*#{word}/i }}}}
+          its(:selector) { should == {"searchable_values" => {"$all" => expected_value.gsub(/^'([^']+)'$/, '\1').split.map {|word| /^extra:#{key}:.*#{word}/i }}}}
           its(:count) { should == 1 }
         end
         context "the instance" do
@@ -38,7 +38,7 @@ describe SearchMagic do
       end
       context "the criteria \"extra:#{key}?\"" do
         subject { Video.search_for("extra:#{key}?") }
-        its(:selector) { should == {:searchable_values => {"$all" => [/^extra:#{key}:[^:\s]+/i]} }}
+        its(:selector) { should == {"searchable_values" => {"$all" => [/^extra:#{key}:[^:\s]+/i]} }}
         its(:count) { should == expected_count }
       end
     end

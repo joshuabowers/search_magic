@@ -3,8 +3,8 @@ class PartNumber
   include SearchMagic::FullTextSearch
   field :value
   
-  references_many :parts
-  referenced_in :part_category
+  has_many :parts
+  belongs_to :part_category
   
   search_on :value, :as => :part_number
   search_on :part_category, :as => :category

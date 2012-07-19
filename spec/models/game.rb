@@ -5,8 +5,8 @@ class Game
   field :price, :type => Float
   field :high_score, :type => Integer
   field :released_on, :type => Date
-  references_and_referenced_in_many :players
-  referenced_in :developer
+  has_and_belongs_to_many :players
+  belongs_to :developer
   
   search_on :title
   search_on :price, :keep_punctuation => true

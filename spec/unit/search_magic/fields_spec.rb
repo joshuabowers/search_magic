@@ -14,7 +14,7 @@ describe SearchMagic::FullTextSearch do
     describe "searchable_values" do
       subject { NoSearchables.fields["searchable_values"] }
       its(:type) { should == Array }
-      its(:default) { should == [] }
+      its(:default_val) { should == [] }
     end
     
     it { should respond_to(:search_for).with(1).argument }
@@ -74,7 +74,7 @@ describe SearchMagic::FullTextSearch do
     context "when searching for anything" do
       subject { Asset.search_for("foo") }
       it { should be_a(Mongoid::Criteria) }
-      its("selector.keys") { should include(:searchable_values) }
+      its("selector.keys") { should include("searchable_values") }
     end
     
     context "when searching for 'foo'" do

@@ -21,13 +21,13 @@ describe SearchMagic do
     
     context "directly searching the searchable_values of an embedded document" do
       subject { User.first.watchlists.all_in(:searchable_values => [/^([^:]+:)?.*watchlist/i]) }
-      its(:selector) { should == {:searchable_values => {"$all" => [/^([^:]+:)?.*watchlist/i]}} }
+      its(:selector) { should == {"searchable_values" => {"$all" => [/^([^:]+:)?.*watchlist/i]}} }
       its(:count) { should == 5 }
     end
     
     context "the search query should be" do
       subject { User.first.watchlists.search_for("watchlist") }
-      its(:selector) { should == {:searchable_values => {"$all" => [/^([^:]+:)?.*watchlist/i]}} }
+      its(:selector) { should == {"searchable_values" => {"$all" => [/^([^:]+:)?.*watchlist/i]}} }
       it { expect { subject.count }.to_not raise_error }
       its(:count) { should == 5 }
     end

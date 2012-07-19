@@ -299,8 +299,8 @@ class Game
   field :price, :type => Float
   field :high_score, :type => Integer
   field :released_on, :type => Date
-  references_and_referenced_in_many :players
-  referenced_in :developer
+  has_and_belongs_to_many :players
+  belongs_to :developer
   
   search_on :title
   search_on :price
@@ -314,7 +314,7 @@ class Developer
   field :name
   field :net_worth
   field :opened_on, :type => Date
-  references_many :games
+  has_many :games
   
   search_on :name
   search_on :opened_on
@@ -343,7 +343,7 @@ class Player
   include Mongoid::Document
   include SearchMagic::FullTextSearch
   field :name
-  references_and_referenced_in_many :games
+  has_and_belongs_to_many :games
   
   search_on :name
   search_on :games
@@ -375,7 +375,7 @@ class Developer
   field :name
   field :net_worth
   field :opened_on, :type => Date
-  references_many :games
+  has_many :games
   
   search_on :name
   search_on :opened_on

@@ -1,5 +1,5 @@
 class AbsolutelyNotSearchable
   include Mongoid::Document
   field :foo, :type => String
-  referenced_in :is_searchable
+  belongs_to :is_searchable
 end

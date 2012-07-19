@@ -48,7 +48,7 @@ describe SearchMagic::FullTextSearch do
     
     context "when searching for 'address_city:nowhereland'" do
       subject { Person.search_for("address_city:nowhereland") }
-      its("selector.keys") { should include(:searchable_values) }
+      its("selector.keys") { should include("searchable_values") }
       its(:count) { should == 1 }
       its("first.name") { should == "Joshua" }
     end

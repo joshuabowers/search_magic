@@ -4,7 +4,7 @@ class Part
   field :serial
   field :status
   
-  referenced_in :part_number
+  belongs_to :part_number
   
   search_on :serial
   search_on :status

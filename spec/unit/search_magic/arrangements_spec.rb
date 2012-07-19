@@ -7,7 +7,7 @@ describe SearchMagic::FullTextSearch do
     describe "arrangeable_values" do
       subject { NoSearchables.fields["arrangeable_values"] }
       its(:type) { should == Hash }
-      its(:default) { should == {} }
+      its(:default_val) { should == {} }
     end
     
     it { should respond_to(:arrange).with(2).argument }
@@ -75,20 +75,20 @@ describe SearchMagic::FullTextSearch do
       subject { Asset.arrange(:title) }
       it { should be_a(Mongoid::Criteria) }
       its(:options) { should_not be_empty }
-      its(:options) { should include(:sort => [["arrangeable_values.title", :asc]]) }
+      its(:options) { should include(:sort => {"arrangeable_values.title" => 1}) }
     end
     
     context "when arranging a model by a searchable.to_s" do
       subject { Asset.arrange("title") }
       it { should be_a(Mongoid::Criteria) }
       its(:options) { should_not be_empty }
-      its(:options) { should include(:sort => [["arrangeable_values.title", :asc]]) }
+      its(:options) { should include(:sort => {"arrangeable_values.title" => 1}) }
     end
     
     context "when arranging a model on multiple searchables" do
       subject { Asset.arrange(:title).arrange(:tag) }
       it { should be_a(Mongoid::Criteria) }
-      its(:options) { should include(:sort => [["arrangeable_values.title", :asc], ["arrangeable_values.tag", :asc]]) }
+      its(:options) { should include(:sort => {"arrangeable_values.title" => 1, "arrangeable_values.tag" => 1}) }
     end
     
     shared_examples_for "arranged assets" do |arrangeable, direction, expected_order|

@@ -8,9 +8,7 @@ require 'fabrication'
 MODELS = File.join(File.dirname(__FILE__), "models")
 
 Mongoid.configure do |config|
-  name = "search_magic_test"
-  config.master = Mongo::Connection.new.db(name)
-  config.logger = nil
+  config.connect_to("search_magic_test")
 end
 
 Dir[ File.join(MODELS, "*.rb") ].sort.each {|file| require file}
