@@ -55,6 +55,8 @@ module SearchMagic
         end
       end
       
+      # p = lambda {|*t| Course.all_in(:coalesced_searchable_values => 
+      #   t.map {|w| /#{w =~ /:/ ? "(?<![\\w:])#{w.scan(/([^:]+:)(.*)/).join("[^\\s]*")}" : ":[^\s]+#{w}"}(?!:)/})}
       def terms_for(pattern)
         rval = /("[^"]+"|'[^']+'|\S+)/
         rnot_separator = "[^#{separator}]+"
