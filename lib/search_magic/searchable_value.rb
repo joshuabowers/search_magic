@@ -1,3 +1,5 @@
+require 'mongoid'
+
 class SearchableValue
   include Mongoid::Document
   include Mongoid::Timestamps
