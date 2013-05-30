@@ -3,6 +3,7 @@ module SearchMagic
     extend ActiveSupport::Concern
     
     included do
+      # embeds_many :searchable_values
       class_attribute :searchable_fields, :instance_writer => false
       self.searchable_fields = {}
       field :searchable_values, :type => Array, :default => []
@@ -142,6 +143,9 @@ module SearchMagic
     private
     
     def update_searchable_values
+      # self.class.searchables.values.each do |metadata|
+      #   
+      # end
       self.searchable_values = self.class.searchables.values.map {|metadata| metadata.searchable_value_for(self)}.flatten
       self.svalues = self.searchable_values.map {|sv| SearchableValue.new(word: sv)}
       

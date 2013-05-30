@@ -11,5 +11,8 @@ describe SearchMagic do
     it { should be_a(SearchableValue) }
   end
   
-  # need a spec to verify that all entries within svalues are unique. E.g. no duplicated words.
+  context "all svalues should be unique" do
+    subject { Fabricate(:game, title: "The Epic Quest of Epicness: Episode 1: The Epicing").svalues.map(&:word) }
+    its(:length) { should == subject.uniq.length } 
+  end
 end
