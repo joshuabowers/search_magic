@@ -1,3 +1,4 @@
+require 'rspec'
 require 'rubygems'
 require 'bundler/setup'
 

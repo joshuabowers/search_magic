@@ -1,0 +1,20 @@
+name: search_magic
+summary: "SearchMagic provides scoped full text search and sort capabilities to Mongoid documents"
+description: "Adds scopes to a Mongoid document providing search and sort capabilities on arbitrary fields and associations."
+license: MIT
+authors: Joshua Bowers
+email: joshua.bowers@gmail.com
+homepage: https://rubygems.org/gems/search_magic
+  
+development_dependencies:
+  bundler: ~> 1.0
+  rake: ~> 0.8
+  rspec: ~> 2.4
+  rubygems-tasks: ~> 0.2
+  yard: ~> 0.8
+  database_cleaner: ~> 1.0.1
+  fabrication: ~> 2.7.1
+
+dependencies:
+  mongoid: ~> 3.1.0
+  chronic: ~> 0.9.1

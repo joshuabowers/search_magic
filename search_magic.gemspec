@@ -1,29 +1,60 @@
-# -*- encoding: utf-8 -*-
-$:.push File.expand_path("../lib", __FILE__)
-require "search_magic/version"
+# encoding: utf-8
 
-Gem::Specification.new do |s|
-  s.name        = "search_magic"
-  s.version     = SearchMagic::VERSION
-  s.platform    = Gem::Platform::RUBY
-  s.authors     = ["Joshua Bowers"]
-  s.email       = ["joshua.bowers+code@gmail.com"]
-  s.homepage    = "http://github.com/joshuabowers/search_magic"
-  s.summary     = %q{SearchMagic provides scoped full text search and sort capabilities to Mongoid documents}
-  s.description = %q{Adds scopes to a Mongoid document providing search and sort capabilities on arbitrary fields and associations.}
-  
-  s.add_dependency("mongoid", "~> 3.0.0")
-  s.add_dependency("chronic")
-  s.add_development_dependency("rspec")
-  s.add_development_dependency("database_cleaner")
-  # s.add_development_dependency("bson_ext")
-  s.add_development_dependency("fabrication")
-  # s.add_development_dependency('ruby-debug19')
+require 'yaml'
 
-  s.rubyforge_project = "search_magic"
+Gem::Specification.new do |gem|
+  gemspec = YAML.load_file('gemspec.yml')
 
-  s.files         = `git ls-files`.split("\n")
-  s.test_files    = `git ls-files -- {test,spec,features}/*`.split("\n")
-  s.executables   = `git ls-files -- bin/*`.split("\n").map{ |f| File.basename(f) }
-  s.require_paths = ["lib"]
+  gem.name    = gemspec.fetch('name')
+  gem.version = gemspec.fetch('version') do
+                  lib_dir = File.join(File.dirname(__FILE__),'lib')
+                  $LOAD_PATH << lib_dir unless $LOAD_PATH.include?(lib_dir)
+
+                  require 'search_magic/version'
+                  SearchMagic::VERSION
+                end
+
+  gem.summary     = gemspec['summary']
+  gem.description = gemspec['description']
+  gem.licenses    = Array(gemspec['license'])
+  gem.authors     = Array(gemspec['authors'])
+  gem.email       = gemspec['email']
+  gem.homepage    = gemspec['homepage']
+
+  glob = lambda { |patterns| gem.files & Dir[*patterns] }
+
+  gem.files = `git ls-files`.split($/)
+  gem.files = glob[gemspec['files']] if gemspec['files']
+
+  gem.executables = gemspec.fetch('executables') do
+    glob['bin/*'].map { |path| File.basename(path) }
+  end
+  gem.default_executable = gem.executables.first if Gem::VERSION < '1.7.'
+
+  gem.extensions       = glob[gemspec['extensions'] || 'ext/**/extconf.rb']
+  gem.test_files       = glob[gemspec['test_files'] || '{test/{**/}*_test.rb']
+  gem.extra_rdoc_files = glob[gemspec['extra_doc_files'] || '*.{txt,md}']
+
+  gem.require_paths = Array(gemspec.fetch('require_paths') {
+    %w[ext lib].select { |dir| File.directory?(dir) }
+  })
+
+  gem.requirements              = gemspec['requirements']
+  gem.required_ruby_version     = gemspec['required_ruby_version']
+  gem.required_rubygems_version = gemspec['required_rubygems_version']
+  gem.post_install_message      = gemspec['post_install_message']
+
+  split = lambda { |string| string.split(/,\s*/) }
+
+  if gemspec['dependencies']
+    gemspec['dependencies'].each do |name,versions|
+      gem.add_dependency(name,split[versions])
+    end
+  end
+
+  if gemspec['development_dependencies']
+    gemspec['development_dependencies'].each do |name,versions|
+      gem.add_development_dependency(name,split[versions])
+    end
+  end
 end

@@ -1,4 +1,7 @@
-source "http://rubygems.org"
+source 'https://rubygems.org'
 
-# Specify your gem's dependencies in search_magic.gemspec
 gemspec
+
+group :development do
+  gem 'kramdown'
+end

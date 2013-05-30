@@ -1,5 +1,9 @@
 # SearchMagic
 
+* [Homepage](https://rubygems.org/gems/search_magic)
+* [Documentation](http://rubydoc.info/gems/search_magic/frames)
+* [Email](mailto:joshua.bowers at gmail.com)
+
 SearchMagic provides full-text search capabilities to [mongoid](http://github.com/mongoid/mongoid) documents, embedded documents, and referenced documents with a clean, consistent, and easy to use syntax. Documents specify which data they want to expose as searchable; users can then search for these documents in either a broad or in a targeted manner.
 
 ## Installation
@@ -494,3 +498,9 @@ Note, in order for the natural language processing to be invoked properly, the *
 
 Feel free to add an [issue on GitHub](search_magic/issues) or fork the project and send a pull request. 
 I’m always looking for new ways of bending hardware to my will, so suggestions are welcome.
+
+## Copyright
+
+Copyright (c) 2013 Joshua Bowers
+
+See {file:LICENSE.txt} for details.
