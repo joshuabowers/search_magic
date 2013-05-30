@@ -144,6 +144,8 @@ module SearchMagic
     def update_searchable_values
       self.searchable_values = self.class.searchables.values.map {|metadata| metadata.searchable_value_for(self)}.flatten
       self.svalues = self.searchable_values.map {|sv| SearchableValue.new(word: sv)}
+      
+      # self.svalues = self.class.searchables.values.map {|metadata| }
     end
     
     def update_arrangeable_values
