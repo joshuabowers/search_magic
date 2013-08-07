@@ -8,7 +8,7 @@ module SearchMagic
       self.searchable_fields = {}
       field :searchable_values, :type => Array, :default => []
       field :arrangeable_values, :type => Hash, :default => {}
-      embeds_many :svalues, class_name: "SearchableValue", as: :searchable
+      embeds_many :svalues, class_name: "SearchableValue", as: :searchable, cascade_callbacks: true
       before_save :update_searchable_values
       before_save :update_arrangeable_values
       after_save :update_associated_documents
@@ -61,17 +61,17 @@ module SearchMagic
       #   t.map {|w| /#{w =~ /:/ ? "(?<![\\w:])#{w.scan(/([^:]+:)(.*)/).join("[^\\s]*")}" : ":[^\s]+#{w}"}(?!:)/})}
       def terms_for(pattern)
         rval = /("[^"]+"|'[^']+'|\S+)/
-        rnot_separator = "[^#{separator}]+"
-        rsearch = /(?:(#{searchable_names})(?:#{separator}#{rval}|(#{presence_detector_escaped})))|#{rval}/i
+        rnot_separator = "[^#{separator_escaped}]+"
+        rsearch = /(?:(#{searchable_names})(?:#{separator_escaped}#{rval}|(#{presence_detector_escaped})))|#{rval}/i
         unless pattern.blank?
           terms = pattern.scan(rsearch).map(&:compact).map do |term|
             selector = term.length > 1 ? Regexp.escape(term.first) : rnot_separator
             metadata = searchables[term.first.match(/^[^:]+/)[0].to_sym] if term.length > 1
             parsed_date = Chronic.parse(term.last) if metadata && metadata.datable?
-            prefix = "#{selector}#{separator}"
+            prefix = "#{selector}#{separator_escaped}"
             prefix = "(#{prefix})?" if term.length == 1
-            fragment = /^#{selector}#{separator}#{parsed_date}/i if parsed_date
-            fragment = /^#{prefix}[^#{separator}\s]+/i if term.last == presence_detector
+            fragment = /^#{selector}#{separator_escaped}#{parsed_date}/i if parsed_date
+            fragment = /^#{prefix}[^#{separator_escaped}\s]+/i if term.last == SearchMagic.presence_detector
             fragment || term.last.scan(/\b(\S+)\b/).flatten.map do |word|
               /^#{prefix}.*#{Regexp.escape(word)}/i
             end
@@ -91,7 +91,7 @@ module SearchMagic
         @option_terms ||= Regexp.union( 
           *{
             :mode => [:all, :any]
-          }.map {|key, value| /(#{key})#{separator}(#{value.join('|')})/i}
+          }.map {|key, value| /(#{key})#{separator_escaped}(#{value.join('|')})/i}
         )
       end
       
@@ -103,8 +103,8 @@ module SearchMagic
         @presence_detector ||= (SearchMagic.config.presence_detector || '?')
       end
       
-      def separator
-        @separator ||= Regexp.escape(SearchMagic.config.selector_value_separator || ':')
+      def separator_escaped
+        @separator_escaped ||= Regexp.escape(SearchMagic.selector_value_separator || ':')
       end
       
       def default_search_mode
@@ -143,13 +143,27 @@ module SearchMagic
     private
     
     def update_searchable_values
-      # self.class.searchables.values.each do |metadata|
-      #   
-      # end
-      self.searchable_values = self.class.searchables.values.map {|metadata| metadata.searchable_value_for(self)}.flatten
-      self.svalues = self.searchable_values.map {|sv| SearchableValue.new(word: sv)}
-      
-      # self.svalues = self.class.searchables.values.map {|metadata| }
+      self.searchable_values = self.class.searchables.values.map {|metadata| metadata.old_searchable_value_for(self)}.flatten
+
+      self.svalues = []
+      self.class.searchables.values.map {|metadata| [metadata.name, metadata.searchable_value_for(self)]}.each do |selector, value|
+        build_searchable_values_from(selector, value)
+      end
+      self.svalues.each(&:update_occurrances)
+    end
+    
+    def build_searchable_values_from(selector, value)
+      case value
+      when Hash
+        value.each {|key, v| build_searchable_values_from([selector, key].join(SearchMagic.selector_value_separator || ':'), v)}
+      when Array
+        value.each {|word| build_searchable_values_from(selector, word)}
+      else
+        self.svalues.find_or_initialize_by(word: value.to_s).tap do |sv|
+          sv.matching_fields[selector] ||= 0
+          sv.matching_fields[selector] += 1
+        end
+      end
     end
     
     def update_arrangeable_values

@@ -39,8 +39,26 @@ module SearchMagic
     def searchable_value_for(obj)
       value_for(get_value(obj)).downcase.split.map {|word| [name.blank? ? nil : name, word].compact.join(separator)}
     end
+    alias old_searchable_value_for searchable_value_for
     
+    def searchable_value_for(obj)
+      sanitize_value(get_value(obj))
+    end
+        
     private
+    
+    def sanitize_value(obj)
+      case obj
+      when Hash
+        Hash[*obj.map{|key, value| [key, sanitize_value(value)]}.flatten(1)]
+      when Array
+        obj.map {|value| sanitize_value(value)}.flatten
+      when String
+        (options[:keep_punctuation] ? obj : obj.gsub(/[[:punct:]]/, ' ')).downcase.split
+      else
+        obj
+      end
+    end
     
     def value_for(obj)
       v = obj
